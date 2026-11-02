@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BuildingData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/building_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+key = "cannon"
+title = "火炮塔"
+cost = 85
+health = 150.0
+damage = 30.0
+radius = 100.0
+interval = 1.5
+tint = Color(1, 0.67, 0.31, 1)

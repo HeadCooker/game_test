@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BuildingData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/building_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+key = "gun"
+title = "机枪塔"
+cost = 45
+health = 120.0
+damage = 12.0
+radius = 84.0
+interval = 0.38
+tint = Color(0.34, 0.87, 0.79, 1)
