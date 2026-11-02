@@ -6,6 +6,6 @@ title = "疾行虫"
 health = 28.0
 speed = 25.0
 damage = 5.0
-reward = 7
+reward = 3
 size = 3.0
 tint = Color(0.94, 0.68, 0.35, 1)

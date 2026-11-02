@@ -4,7 +4,7 @@
 script = ExtResource("1")
 key = "cannon"
 title = "火炮塔"
-cost = 85
+cost = 90
 health = 150.0
 damage = 30.0
 radius = 100.0

@@ -45,4 +45,8 @@ func measure() -> void:
 		print(report)
 		var file := FileAccess.open("res://build/benchmark.txt", FileAccess.WRITE)
 		file.store_string(report)
+		file.close()
+		process_frame.disconnect(measure)
+		game.queue_free()
+		await process_frame
 		quit()

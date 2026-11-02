@@ -33,7 +33,11 @@ func _draw() -> void:
 		draw_line(Vector2(-2, 4), Vector2(3, -4), Color("e8c7ff"), 2)
 	else:
 		draw_rect(Rect2(-3, -4, 6, 6), Color("273649"))
-		draw_line(Vector2.ZERO, aim * 9, Color("ebf5ed") if flash > 0 else color.lightened(0.3), 3)
+		if data.key == "tesla":
+			draw_arc(Vector2.ZERO, 4, 0, TAU, 8, color.lightened(0.4), 2)
+			draw_line(Vector2(-1, -5), Vector2(2, 2), Color("ffffff"), 1)
+		else:
+			draw_line(Vector2.ZERO, aim * (12 if data.key == "sniper" else 9), Color("ebf5ed") if flash > 0 else color.lightened(0.3), 2 if data.key == "sniper" else 3)
 		for i in level:
 			draw_rect(Rect2(-5 + i * 4, 4, 2, 2), Color("f6d782"))
 	if hp < max_health():

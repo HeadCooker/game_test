@@ -3,10 +3,11 @@
 [resource]
 script = ExtResource("1")
 title = "重甲虫"
-health = 150.0
+health = 190.0
 speed = 10.0
-damage = 13.0
-reward = 16
-armor = 3.0
+damage = 17.0
+reward = 7
+armor = 20.0
 size = 5.0
 tint = Color(0.83, 0.35, 0.42, 1)
+slow_resistance = 0.55

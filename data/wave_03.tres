@@ -2,11 +2,15 @@
 [ext_resource type="Script" path="res://scripts/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-count = 25
-spawn_interval = 1.36
-preparation = 45.0
-health_multiplier = 1.24
-fast_ratio = 0.25
-armored_ratio = 0
+count = 30
+spawn_interval = 1.05
+preparation = 40.0
+health_multiplier = 1.25
+fast_ratio = 0.2
+armored_ratio = 0.0
+burrow_ratio = 0.12
+spitter_ratio = 0.0
+shield_ratio = 0.0
 sides = PackedInt32Array(0, 2)
 boss = false
+clear_reward = 66

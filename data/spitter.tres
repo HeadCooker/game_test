@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "腐蚀喷吐虫"
+ability = "spitter"
+health = 115.0
+speed = 13.0
+damage = 11.0
+reward = 5
+size = 5.0
+attack_range = 62.0
+attack_interval = 1.8
+tint = Color(0.58, 0.78, 0.3, 1)

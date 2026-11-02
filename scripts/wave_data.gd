@@ -8,3 +8,7 @@ extends Resource
 @export var armored_ratio: float = 0.0
 @export var sides: PackedInt32Array = PackedInt32Array([0])
 @export var boss: bool = false
+@export var burrow_ratio: float = 0.0
+@export var spitter_ratio: float = 0.0
+@export var shield_ratio: float = 0.0
+@export var clear_reward: int = 55

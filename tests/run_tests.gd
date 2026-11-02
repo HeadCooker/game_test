@@ -126,5 +126,200 @@ func run() -> void:
 	check(fresh.phase == fresh.Phase.DEFEAT, "Core destruction triggers defeat")
 	fresh.queue_free()
 	await process_frame
+	await feedback_checks()
 	print("CHECKS: %d | FAILURES: %d" % [checks, failures])
 	quit(1 if failures else 0)
+
+func test_game():
+	var game = load("res://scenes/main.tscn").instantiate()
+	root.add_child(game)
+	game.set_process(false)
+	game.started = true
+	game.overlay.hide()
+	game.rng.seed = 20261102
+	return game
+
+func feedback_checks() -> void:
+	var game = test_game()
+	for i in game.build_buttons.size():
+		var rect: Rect2 = game.build_buttons[i].get_global_rect()
+		check(rect.end.x <= 640 and rect.end.y < 220, "Building choice fits the viewport")
+		for j in range(i + 1, game.build_buttons.size()):
+			check(not rect.intersects(game.build_buttons[j].get_global_rect()), "Building buttons do not overlap")
+	game.alloy = 1000
+	game.place_building(Vector2i(13, 7), 0)
+	game.board.selected = Vector2i(13, 7)
+	game.refresh_ui()
+	# Real press / release separated by repeated UI updates reproduces the old bug.
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.position = game.upgrade_button.get_global_rect().get_center()
+	press.global_position = press.position
+	press.pressed = true
+	root.push_input(press)
+	await process_frame
+	for i in 5: game.refresh_ui()
+	var release := press.duplicate() as InputEventMouseButton
+	release.pressed = false
+	root.push_input(release)
+	await process_frame
+	check(game.selected_tower().level == 2 and not game.paused, "Unpaused preparation upgrade works through a real UI click")
+	var before_wait: int = game.alloy
+	game._process(5.0)
+	check(game.alloy == before_wait, "Waiting during preparation generates no income")
+	game.place_building(Vector2i(10, 8), 4)
+	game.place_building(Vector2i(10, 9), 4)
+	game.place_building(Vector2i(10, 10), 4)
+	check(not game.place_building(Vector2i(10, 11), 4), "Recovery stations capped at three")
+	var before_station_wait: int = game.alloy
+	game._process(5.0)
+	check(game.alloy == before_station_wait, "Recovery stations do not produce timed income")
+	game.start_wave()
+	var before_clear: int = game.alloy
+	game.grant_clear_reward()
+	check(game.alloy == before_clear + game.waves[0].clear_reward + 36, "Three recovery stations add fixed clear rewards")
+	var after_clear: int = game.alloy
+	game.grant_clear_reward()
+	check(game.alloy == after_clear, "Wave completion cannot pay twice")
+	# Clearing after waiting or immediately gives the same economic result.
+	var immediate = test_game()
+	var waiting = test_game()
+	immediate.start_wave()
+	for i in 30: waiting._process(1.0)
+	waiting.start_wave()
+	immediate.grant_clear_reward()
+	waiting.grant_clear_reward()
+	check(immediate.alloy == waiting.alloy, "Early wave start has no economic penalty")
+	immediate.queue_free()
+	waiting.queue_free()
+	# Underground attacks start two tiles away, never inside a structure.
+	var burrow: AlienBug = game.spawn_enemy(game.waves[2], 4)
+	var underground_cell: Vector2i = game.board.cell_at(burrow.position)
+	check(maxi(absi(underground_cell.x - BattleBoard.CORE.x), absi(underground_cell.y - BattleBoard.CORE.y)) == 2, "Burrow chooses the core's second ring")
+	check(not game.board.buildings.has(underground_cell), "Burrow does not spawn inside a building")
+	check(burrow.emerging > 1.0, "Burrow gives an emergence warning")
+	var old_core: float = game.core_hp
+	game.update_enemies(0.5)
+	check(game.core_hp == old_core, "Warning phase cannot attack the core")
+	check(not game.place_building(underground_cell, 3), "Cannot build on a warned emergence cell")
+	# Shield recovery, counters and ranged siege are behavior tests, not just health checks.
+	var shield: AlienBug = game.spawn_enemy(game.waves[0], 6)
+	var old_hp: float = shield.hp
+	game.hit_enemy(shield, 20)
+	check(shield.hp == old_hp and shield.shield_hp == shield.max_shield - 20, "Normal fire first hits shields")
+	game.hit_enemy(shield, 10, "energy")
+	check(shield.shield_hp == shield.max_shield - 40, "Energy does double shield damage")
+	var shield_before: float = shield.shield_hp
+	game.hit_enemy(shield, 10, "piercing")
+	check(shield.hp == old_hp - 10 and shield.shield_hp == shield_before, "Rail damage bypasses shields")
+	shield.since_hit = 3.0
+	game.update_enemies(0.5)
+	check(shield.shield_hp > shield_before, "Shield regenerates after not being hit")
+	var armored: AlienBug = game.spawn_enemy(game.waves[0], 2)
+	var armor_hp: float = armored.hp
+	game.hit_enemy(armored, 10, "piercing")
+	check(armored.hp == armor_hp - 10, "Rail damage bypasses armor")
+	var spitter: AlienBug = game.spawn_enemy(game.waves[0], 5)
+	spitter.position = game.board.center(Vector2i(13, 4))
+	spitter.route_from = Vector2i(13, 4)
+	spitter.destination = Vector2i(13, 4)
+	var tower: DefenseTower = game.board.buildings[Vector2i(13, 7)]
+	var tower_hp: float = tower.hp
+	game.update_enemies(0.1)
+	check(tower.hp < tower_hp and spitter.position.distance_to(tower.position) > 30, "Spitter attacks structures from range")
+	# Chain should hit nearby targets exactly once and never hit a distant one.
+	for enemy: AlienBug in game.enemies: enemy.hp = 0
+	game.update_towers(0.1)
+	var chain_targets: Array[AlienBug] = []
+	for i in 5:
+		var target: AlienBug = game.spawn_enemy(game.waves[0], 0)
+		target.position = Vector2(80 + 20 * i, 80)
+		chain_targets.append(target)
+	var distant: AlienBug = game.spawn_enemy(game.waves[0], 0)
+	distant.position = Vector2(400, 200)
+	game.chain_lightning(chain_targets[0], Vector2.ZERO, 5, Color.WHITE)
+	var struck := 0
+	for target in chain_targets:
+		if target.hp < target.max_hp: struck += 1
+	check(struck == 4 and distant.hp == distant.max_hp, "Tesla chains to four distinct nearby targets")
+	var boss: AlienBug = game.spawn_enemy(game.waves[9], 3)
+	boss.position = game.board.center(Vector2i(5, 5))
+	boss.destination = Vector2i(5, 5)
+	boss.route_from = Vector2i(5, 5)
+	boss.hp = boss.max_hp * 0.4
+	boss.summon_timer = 0
+	var count_before: int = game.enemies.size()
+	game.update_enemies(0.1)
+	check(game.enemies.size() > count_before and boss.summon_timer == 6.0, "Enraged boss summons reinforcements faster")
+	var child: AlienBug = game.enemies[-1]
+	child.emerging = 0
+	var money_before_child: int = game.alloy
+	game.hit_enemy(child, 10000, "piercing")
+	check(game.alloy == money_before_child and child.summoned, "Summoned enemies cannot be farmed for money")
+	game.queue_free()
+	await process_frame
+	var navigation = test_game()
+	navigation.alloy = 100000
+	# A vertical wall with a distant gap: attacking is cheaper than a huge detour.
+	for y in range(1, 15): navigation.place_building(Vector2i(12, y), 3)
+	var cell := Vector2i(9, 8)
+	var breaks_wall := false
+	for i in 50:
+		cell = navigation.board.next_cell(cell)
+		if navigation.board.buildings.has(cell): breaks_wall = true; break
+		if cell == BattleBoard.CORE: break
+	check(breaks_wall, "A long detour makes enemies choose to breach a wall")
+	var diagonal_from := Vector2i(5, 5)
+	var diagonal_to := diagonal_from + Vector2i(1, 1)
+	navigation.place_building(diagonal_from + Vector2i.RIGHT, 3)
+	check(not navigation.board.diagonal_clear(diagonal_from, diagonal_to), "Diagonal paths cannot cut a blocked corner")
+	navigation.queue_free()
+	await process_frame
+	var open_board = test_game()
+	open_board.place_building(Vector2i(14, 5), 3)
+	var short_route := Vector2i(14, 3)
+	var short_route_avoids := true
+	for i in 50:
+		if short_route == BattleBoard.CORE: break
+		short_route = open_board.board.next_cell(short_route)
+		if open_board.board.buildings.has(short_route): short_route_avoids = false
+	check(short_route == BattleBoard.CORE and short_route_avoids, "A short detour remains preferable to breaching")
+	open_board.board.selected = Vector2i(14, 5)
+	open_board.sell_selected()
+	var walk_cell := Vector2i(3, 2)
+	var found_diagonal := false
+	for i in 30:
+		var next: Vector2i = open_board.board.next_cell(walk_cell)
+		var step := next - walk_cell
+		if step.x != 0 and step.y != 0: found_diagonal = true
+		walk_cell = next
+		if walk_cell == BattleBoard.CORE: break
+	check(found_diagonal, "Open terrain permits diagonal walking")
+	var unique := {}
+	for variant in 3:
+		var route := ""
+		cell = Vector2i(2, 2)
+		var seen := {}
+		for i in 448:
+			if cell == BattleBoard.CORE: break
+			check(not seen.has(cell), "Random route preference never cycles")
+			seen[cell] = true
+			cell = open_board.board.next_cell(cell, variant)
+			route += str(cell)
+		check(cell == BattleBoard.CORE, "Each route preference reaches core")
+		unique[route] = true
+	check(unique.size() > 1, "Different route preferences produce different open routes")
+	var diagonal_enemy: AlienBug = open_board.spawn_enemy(open_board.waves[0], 0)
+	diagonal_enemy.route_from = Vector2i(5, 5)
+	diagonal_enemy.destination = Vector2i(6, 6)
+	diagonal_enemy.position = diagonal_enemy.waypoint(Vector2i(5, 5))
+	check(not open_board.place_building(Vector2i(6, 5), 3), "Cannot place a corner into an enemy's active diagonal segment")
+	# With no defenses, the whole run should actually be losable.
+	var ticks := 0
+	while open_board.phase < open_board.Phase.VICTORY and ticks < 10000:
+		if open_board.phase == open_board.Phase.PREPARE: open_board.start_wave()
+		open_board._process(0.2)
+		ticks += 1
+	check(open_board.phase == open_board.Phase.DEFEAT, "Undefended base loses")
+	open_board.queue_free()
+	await process_frame

@@ -5,9 +5,11 @@ signal status_changed
 enum Phase { PREPARE, ATTACK, VICTORY, DEFEAT }
 const TOWER_SCENE = preload("res://scenes/tower.tscn")
 const ENEMY_SCENE = preload("res://scenes/enemy.tscn")
-const BUILDINGS = [preload("res://data/gun.tres"), preload("res://data/cannon.tres"), preload("res://data/slow.tres"), preload("res://data/wall.tres"), preload("res://data/miner.tres")]
-const BUGS = [preload("res://data/bug.tres"), preload("res://data/runner.tres"), preload("res://data/armored.tres"), preload("res://data/boss.tres")]
+const BUILDINGS = [preload("res://data/gun.tres"), preload("res://data/cannon.tres"), preload("res://data/slow.tres"), preload("res://data/wall.tres"), preload("res://data/miner.tres"), preload("res://data/tesla.tres"), preload("res://data/sniper.tres")]
+const BUGS = [preload("res://data/bug.tres"), preload("res://data/runner.tres"), preload("res://data/armored.tres"), preload("res://data/boss.tres"), preload("res://data/burrow.tres"), preload("res://data/spitter.tres"), preload("res://data/shield.tres")]
 var waves: Array[WaveData] = []
+const MINER_LIMIT := 3
+const SALVAGE_PER_STATION := 12
 var board: BattleBoard
 var enemies: Array[AlienBug] = []
 var phase := Phase.PREPARE
@@ -17,10 +19,11 @@ var wave := 0
 var cleared := 0
 var kills := 0
 var elapsed := 0.0
-var timer := 45.0
+var timer := 40.0
 var spawn_timer := 0.0
 var spawned := 0
-var income_timer := 0.0
+var last_clear_reward := 0
+var rewarded_wave := 0
 var evacuation := false
 var paused := false
 var started := false
@@ -48,6 +51,8 @@ var sound_enabled := true
 var audio: AudioStreamPlayer
 var shot_sound: AudioStreamWAV
 var sound_cooldown := 0.0
+var ui_timer := 0.0
+var preview_signature: Array = []
 
 func _ready() -> void:
 	rng.randomize()
@@ -66,7 +71,7 @@ func _ready() -> void:
 	economy_changed.connect(refresh_ui)
 	status_changed.connect(refresh_ui)
 	refresh_ui()
-	show_overlay("异星撤离", "采矿前哨已被虫群发现。守住核心，等待撤离。\n\n① 左侧网格自由建塔，四周红色区域禁止建造。\n② 炮塔自动攻击；采矿机每 5 秒产出 4 合金。\n③ 按空格暂停并布防，按 Enter 提前迎战。\n④ 点击建筑可升级、维修或出售。\n\n10 波虫潮后守住 30 秒，即可撤离。", "开始防守")
+	show_overlay("异星撤离", "采矿前哨已被虫群发现。守住核心，等待撤离。\n\n① 左侧网格自由建塔，四周红色区域禁止建造。\n② 收入来自击杀和过波，等待不产钱。\n③ 按空格暂停并布防，按 Enter 提前迎战。\n④ 点击建筑可升级、维修或出售。\n\n第 3 波起注意地下裂隙，第 5 波起有远程敌人。\n10 波后等待撤离；回收站每过一波额外 +12。", "开始防守")
 
 func label_at(parent: Node, text: String, pos: Vector2, size: Vector2, font_size: int = 11) -> Label:
 	var label := Label.new()
@@ -105,6 +110,7 @@ func button_at(parent: Node, text: String, pos: Vector2, size: Vector2, action: 
 	disabled_style.bg_color = Color("101a23")
 	button.add_theme_stylebox_override("disabled", disabled_style)
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(action)
 	parent.add_child(button)
 	return button
@@ -112,14 +118,20 @@ func button_at(parent: Node, text: String, pos: Vector2, size: Vector2, action: 
 func make_ui() -> void:
 	var canvas := CanvasLayer.new()
 	add_child(canvas)
-	label_at(canvas, "异星撤离  /  OUTPOST 07", Vector2(12, 6), Vector2(300, 20), 16)
+	label_at(canvas, "异星撤离 / OUTPOST 07 · v0.2", Vector2(12, 6), Vector2(300, 20), 16)
 	hud = label_at(canvas, "", Vector2(12, 30), Vector2(620, 28), 12)
 	label_at(canvas, "防御部署", Vector2(474, 62), Vector2(155, 20), 13)
-	for i in BUILDINGS.size():
+	var display_order := [0, 1, 2, 3, 4, 5, 6]
+	var short_names := ["机枪", "火炮", "减速", "围墙", "回收", "电弧", "狙击"]
+	build_buttons.resize(BUILDINGS.size())
+	for slot in display_order.size():
+		var i: int = display_order[slot]
 		var config: BuildingData = BUILDINGS[i]
-		var button := button_at(canvas, "%d  %s   %d" % [i + 1, config.title, config.cost], Vector2(474, 86 + 26 * i), Vector2(154, 23), choose_building.bind(i))
-		build_buttons.append(button)
-	details = label_at(canvas, "", Vector2(474, 219), Vector2(154, 35), 10)
+		var button := button_at(canvas, "%d %s %d" % [i + 1, short_names[i], config.cost], Vector2(474 + (slot % 2) * 80, 84 + (slot / 2) * 33), Vector2(74, 31), choose_building.bind(i))
+		button.add_theme_font_size_override("font_size", 9)
+		button.tooltip_text = config.title + "：" + building_description(config.key)
+		build_buttons[i] = button
+	details = label_at(canvas, "", Vector2(474, 220), Vector2(154, 35), 10)
 	upgrade_button = button_at(canvas, "升级", Vector2(474, 258), Vector2(74, 24), upgrade_selected)
 	repair_button = button_at(canvas, "维修", Vector2(554, 258), Vector2(74, 24), repair_selected)
 	sell_button = button_at(canvas, "出售", Vector2(474, 286), Vector2(74, 24), sell_selected)
@@ -133,7 +145,8 @@ func make_ui() -> void:
 	overlay.size = Vector2(640, 360)
 	canvas.add_child(overlay)
 	overlay_title = label_at(overlay, "", Vector2(64, 35), Vector2(520, 40), 26)
-	overlay_body = label_at(overlay, "", Vector2(64, 86), Vector2(520, 195), 13)
+	overlay_body = label_at(overlay, "", Vector2(64, 86), Vector2(520, 195), 11)
+	overlay_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	overlay_button = button_at(overlay, "", Vector2(64, 288), Vector2(200, 34), overlay_action)
 	var sound := CheckButton.new()
 	sound.text = "音效"
@@ -169,7 +182,7 @@ func confirm_restart() -> void:
 	show_overlay("重新开始？", "当前这一局的进度将被清空。\n按 Esc 可返回游戏。", "确认重开")
 
 func show_help() -> void:
-	show_overlay("前哨操作手册", "1—5：选择建筑　　左键：建造 / 选中\n右键 / Esc：取消建造、关闭帮助\n空格：暂停 / 继续　　Enter：提前迎战\n\n围墙能拖住敌人；完全封路后虫群会拆墙。\n火炮造成范围伤害，减速塔让虫群移动变慢。\n采矿机会占用空间且容易被破坏，请保护它。\n选中建筑后，可在右侧升级、维修或出售。", "返回防守")
+	show_overlay("前哨操作手册", "1—7：选择建筑　　左键：建造 / 选中\n右键 / Esc：取消建造、关闭帮助\n空格：暂停 / 继续　　Enter：提前迎战\n\n虫群会斜走，绕路太远时会拆墙，不会穿墙角。\n回收站每过波 +12（最多 3 座），等待没有收益。\n钻地虫有裂隙预警；电弧破盾，狙击无视盾甲。\n选中建筑后，可在右侧升级、维修或出售。", "返回防守")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -183,7 +196,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if overlay.visible: return
 		if event.keycode == KEY_SPACE: toggle_pause()
 		if event.keycode == KEY_ENTER: start_wave()
-		if event.keycode >= KEY_1 and event.keycode <= KEY_5:
+		if event.keycode >= KEY_1 and event.keycode <= KEY_7:
 			choose_building(event.keycode - KEY_1)
 	if event is InputEventMouseButton and event.pressed and not overlay.visible and phase < Phase.VICTORY:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
@@ -205,12 +218,30 @@ func choose_building(index: int) -> void:
 	board.selected = Vector2i(-1, -1)
 	refresh_ui()
 
+func enemy_blocks_cell(enemy: AlienBug, cell: Vector2i) -> bool:
+	if enemy.hp <= 0: return false
+	if board.cell_at(enemy.position) == cell or enemy.destination == cell or enemy.route_from == cell: return true
+	var delta := enemy.destination - enemy.route_from
+	if absi(delta.x) == 1 and absi(delta.y) == 1:
+		return cell == enemy.route_from + Vector2i(delta.x, 0) or cell == enemy.route_from + Vector2i(0, delta.y)
+	return false
+
+func station_count() -> int:
+	var count := 0
+	for tower: DefenseTower in board.buildings.values():
+		if tower.data.key == "miner": count += 1
+	return count
+
+func building_description(key: String) -> String:
+	return {"gun": "机枪：便宜、高射速，对重甲效果较弱。", "cannon": "火炮：范围爆炸，克制密集虫群。", "slow": "减速：降低移动速度，重甲和首领有抗性。", "wall": "围墙：阻挡并吸引拆墙；远程敌人可隔墙攻击。", "miner": "回收站：每次过波额外 +12 合金，最多 3 座。", "tesla": "电弧：最多连锁 4 个敌人，对护盾造成双倍伤害。", "sniper": "狙击：射程远，优先精英，无视护盾和护甲。"}.get(key, "")
+
 func place_building(cell: Vector2i, index: int) -> bool:
 	if phase >= Phase.VICTORY or index < 0 or index >= BUILDINGS.size(): return false
 	var data: BuildingData = BUILDINGS[index]
 	if not board.can_build(cell) or alloy < data.cost: return false
+	if data.key == "miner" and station_count() >= MINER_LIMIT: return false
 	for enemy in enemies:
-		if enemy.hp > 0 and (board.cell_at(enemy.position) == cell or enemy.destination == cell): return false
+		if enemy_blocks_cell(enemy, cell): return false
 	var tower: DefenseTower = TOWER_SCENE.instantiate()
 	tower.setup(data, cell)
 	tower.position = board.center(cell)
@@ -278,14 +309,6 @@ func _process(delta: float) -> void:
 		return
 	elapsed += delta
 	sound_cooldown -= delta
-	income_timer += delta
-	if income_timer >= 5.0:
-		income_timer -= 5.0
-		var income := 2
-		for tower: DefenseTower in board.buildings.values():
-			if tower.data.key == "miner": income += 4
-		alloy += income
-		economy_changed.emit()
 	if phase == Phase.PREPARE:
 		timer -= delta
 		if timer <= 0: start_wave()
@@ -301,7 +324,7 @@ func _process(delta: float) -> void:
 			spawn_timer = config.spawn_interval
 		if spawned >= config.count and enemies.is_empty():
 			cleared = wave
-			alloy += 25 + wave * 4
+			grant_clear_reward()
 			if wave == waves.size():
 				evacuation = true
 				timer = 30.0
@@ -318,8 +341,18 @@ func _process(delta: float) -> void:
 	board.position = Vector2(12, 64)
 	if shake_enabled and effects.any(func(effect: Dictionary): return effect.kind == "blast" and effect.life > 0.15):
 		board.position += Vector2(rng.randf_range(-1, 1), rng.randf_range(-1, 1))
-	refresh_ui()
+	ui_timer += delta
+	if ui_timer >= 0.1:
+		ui_timer = 0.0
+		refresh_ui()
 	effect_layer.queue_redraw()
+
+func grant_clear_reward() -> void:
+	if wave <= rewarded_wave: return
+	rewarded_wave = wave
+	last_clear_reward = waves[wave - 1].clear_reward + station_count() * SALVAGE_PER_STATION
+	alloy += last_clear_reward
+	economy_changed.emit()
 
 func update_preview() -> void:
 	board.hover = board.cell_at(board.get_local_mouse_position())
@@ -329,55 +362,139 @@ func update_preview() -> void:
 		var data: BuildingData = BUILDINGS[selected_type]
 		var valid := board.can_build(board.hover) and alloy >= data.cost
 		for enemy in enemies:
-			if board.cell_at(enemy.position) == board.hover or enemy.destination == board.hover: valid = false
+			if enemy_blocks_cell(enemy, board.hover): valid = false
+		if data.key == "miner" and station_count() >= MINER_LIMIT: valid = false
 		board.preview_color = Color(0.3, 0.9, 0.7, 0.4) if valid else Color(1, 0.3, 0.3, 0.4)
 		board.preview_radius = data.radius
-	board.queue_redraw()
+	var signature: Array = [board.hover, board.preview_color, board.preview_radius, board.selected, board.approach_sides]
+	if signature != preview_signature:
+		preview_signature = signature
+		board.queue_redraw()
 
-func spawn_enemy(config: WaveData) -> void:
-	var side: int = config.sides[spawned % config.sides.size()]
-	var cell := Vector2i(rng.randi_range(2, 25), 0)
-	if side == 1: cell = Vector2i(27, rng.randi_range(2, 13))
-	if side == 2: cell = Vector2i(rng.randi_range(2, 25), 15)
-	if side == 3: cell = Vector2i(0, rng.randi_range(2, 13))
+func burrow_cell() -> Vector2i:
+	# Prefer a ring two tiles from the core; expand only when it is full.
+	for radius in range(2, 5):
+		var candidates: Array[Vector2i] = []
+		for y in range(-radius, radius + 1):
+			for x in range(-radius, radius + 1):
+				if maxi(absi(x), absi(y)) != radius: continue
+				var cell := BattleBoard.CORE + Vector2i(x, y)
+				if not board.can_build(cell): continue
+				var occupied := false
+				for other in enemies:
+					if enemy_blocks_cell(other, cell): occupied = true; break
+				if not occupied: candidates.append(cell)
+		if not candidates.is_empty(): return candidates[rng.randi_range(0, candidates.size() - 1)]
+	return Vector2i(-1, -1)
+
+func spawn_enemy(config: WaveData, forced_kind: int = -1) -> AlienBug:
+	var side: int = config.sides[rng.randi_range(0, config.sides.size() - 1)]
+	var cell := Vector2i(rng.randi_range(1, 26), 0)
+	if side == 1: cell = Vector2i(27, rng.randi_range(1, 14))
+	if side == 2: cell = Vector2i(rng.randi_range(1, 26), 15)
+	if side == 3: cell = Vector2i(0, rng.randi_range(1, 14))
 	var roll := rng.randf()
 	var kind := 0
-	if roll < config.armored_ratio: kind = 2
-	elif roll < config.armored_ratio + config.fast_ratio: kind = 1
+	var accumulated := 0.0
+	var ratios := [config.fast_ratio, config.armored_ratio, config.burrow_ratio, config.spitter_ratio, config.shield_ratio]
+	var kinds := [1, 2, 4, 5, 6]
+	for i in ratios.size():
+		accumulated += ratios[i]
+		if roll < accumulated:
+			kind = kinds[i]
+			break
 	if config.boss and spawned == config.count - 1: kind = 3
+	if forced_kind >= 0: kind = forced_kind
+	if kind == 4:
+		var underground := burrow_cell()
+		if board.inside(underground): cell = underground
 	var enemy: AlienBug = ENEMY_SCENE.instantiate()
 	enemy.setup(BUGS[kind], config.health_multiplier)
-	enemy.position = board.center(cell)
+	enemy.route_variant = rng.randi_range(0, 2)
+	enemy.lane_offset = Vector2(rng.randf_range(-2, 2), rng.randf_range(-2, 2))
+	enemy.position = enemy.waypoint(cell)
 	enemy.destination = cell
+	enemy.route_from = cell
+	if kind == 4: enemy.emerging = 1.8
 	board.add_child(enemy)
 	enemies.append(enemy)
+	return enemy
+
+func summon_minions(boss: AlienBug) -> void:
+	if enemies.size() >= 220: return
+	var source := board.cell_at(boss.position)
+	var count := 0
+	for step in BattleBoard.STEPS:
+		var cell: Vector2i = source + step
+		if not board.inside(cell) or cell == BattleBoard.CORE or board.buildings.has(cell): continue
+		var occupied := false
+		for other in enemies:
+			if enemy_blocks_cell(other, cell): occupied = true; break
+		if occupied: continue
+		var child := spawn_enemy(waves[wave - 1], 1)
+		child.position = child.waypoint(cell)
+		child.route_from = cell
+		child.destination = cell
+		child.summoned = true
+		child.emerging = 0.8
+		count += 1
+		if count == 3: break
 
 func update_enemies(delta: float) -> void:
-	for enemy in enemies:
+	for enemy: AlienBug in enemies.duplicate():
 		if enemy.hp <= 0: continue
 		enemy.animation += delta
+		if enemy.emerging > 0:
+			enemy.emerging = maxf(0, enemy.emerging - delta)
+			enemy.queue_redraw()
+			continue
 		enemy.slow_time = maxf(0, enemy.slow_time - delta)
 		enemy.attack_timer -= delta
-		var cell := board.cell_at(enemy.position)
-		if enemy.position.distance_to(board.center(enemy.destination)) < 0.1:
-			enemy.destination = board.next_cell(cell)
+		enemy.since_hit += delta
+		if enemy.max_shield > 0 and enemy.since_hit >= 3:
+			enemy.shield_hp = minf(enemy.max_shield, enemy.shield_hp + enemy.max_shield * 0.18 * delta)
+		var enraged := enemy.data.ability == "boss" and enemy.hp < enemy.max_hp * 0.5
+		if enemy.data.ability == "boss":
+			enemy.summon_timer -= delta
+			if enemy.summon_timer <= 0:
+				enemy.summon_timer = 6.0 if enraged else 9.0
+				summon_minions(enemy)
+		var at_waypoint := enemy.position.distance_to(enemy.waypoint(enemy.destination)) < 0.1
+		if at_waypoint:
+			enemy.route_from = enemy.destination
+			enemy.destination = board.next_cell(enemy.route_from, enemy.route_variant)
 		var target: DefenseTower = board.buildings.get(enemy.destination)
-		var attacks_core := cell == BattleBoard.CORE or (enemy.destination == BattleBoard.CORE and enemy.position.distance_to(board.center(BattleBoard.CORE)) < 17)
+		var attacks_core := enemy.position.distance_to(board.center(BattleBoard.CORE)) <= enemy.data.attack_range
+		if enemy.data.ability == "spitter":
+			# Ranged siege stops outside the wall and attacks nearby defenses first.
+			var nearest := enemy.data.attack_range
+			for tower: DefenseTower in board.buildings.values():
+				var distance := enemy.position.distance_to(tower.position)
+				if distance <= nearest:
+					nearest = distance
+					target = tower
+			if target != null and enemy.position.distance_to(target.position) > enemy.data.attack_range:
+				target = null
+			if target != null: attacks_core = false
 		if target != null or attacks_core:
 			if enemy.attack_timer <= 0:
-				enemy.attack_timer = 1.0
+				enemy.attack_timer = enemy.data.attack_interval / (1.5 if enraged else 1.0)
+				var damage := enemy.data.damage * (1.5 if enraged else 1.0)
 				if attacks_core:
-					core_hp = maxf(0, core_hp - enemy.data.damage)
+					core_hp = maxf(0, core_hp - damage)
 					if core_hp <= 0:
 						finish(false)
 						return
 				else:
-					target.hp -= enemy.data.damage
+					target.hp -= damage
+					if enemy.data.ability == "spitter":
+						effects.append({"kind": "shot", "from": enemy.position, "to": target.position, "color": Color("b4ff6e"), "life": 0.24})
 					target.queue_redraw()
 					if target.hp <= 0: remove_building(target)
 		else:
-			var speed := enemy.data.speed * (0.45 if enemy.slow_time > 0 else 1.0)
-			enemy.position = enemy.position.move_toward(board.center(enemy.destination), speed * delta)
+			var slow := lerpf(0.45, 1.0, enemy.data.slow_resistance) if enemy.slow_time > 0 else 1.0
+			var speed := enemy.data.speed * slow * (1.5 if enraged else 1.0)
+			enemy.position = enemy.position.move_toward(enemy.waypoint(enemy.destination), speed * delta)
 		enemy.queue_redraw()
 
 func update_towers(delta: float) -> void:
@@ -390,11 +507,14 @@ func update_towers(delta: float) -> void:
 			continue
 		var target: AlienBug = null
 		var radius := tower.data.radius + (tower.level - 1) * 8
-		var best_distance := radius
+		var best_score := -INF
 		for enemy in enemies:
 			var distance := tower.position.distance_to(enemy.position)
-			if enemy.hp > 0 and distance < best_distance:
-				best_distance = distance
+			if enemy.hp <= 0 or enemy.emerging > 0 or distance >= radius: continue
+			var score := -distance
+			if tower.data.key == "sniper": score = enemy.max_hp + enemy.max_shield - distance * 0.1
+			if score > best_score:
+				best_score = score
 				target = enemy
 		if target == null: continue
 		tower.aim = (target.position - tower.position).normalized()
@@ -406,11 +526,13 @@ func update_towers(delta: float) -> void:
 		if tower.data.key == "cannon":
 			var impact := target.position
 			effects.append({"kind": "blast", "to": impact, "color": color, "life": 0.26})
-			for enemy in enemies.duplicate():
+			for enemy: AlienBug in enemies.duplicate():
 				if enemy.position.distance_to(impact) < 28: hit_enemy(enemy, damage)
+		elif tower.data.key == "tesla":
+			chain_lightning(target, tower.position, damage, color)
 		else:
 			if tower.data.key == "slow": target.slow_time = 2.0
-			hit_enemy(target, damage)
+			hit_enemy(target, damage, "piercing" if tower.data.key == "sniper" else "normal")
 		if sound_enabled and sound_cooldown <= 0:
 			audio.pitch_scale = 0.65 if tower.data.key == "cannon" else 1.0
 			audio.play()
@@ -421,12 +543,39 @@ func update_towers(delta: float) -> void:
 			enemies[i].queue_free()
 			enemies.remove_at(i)
 
-func hit_enemy(enemy: AlienBug, damage: float) -> void:
-	if enemy.hp <= 0: return
-	enemy.hp -= maxf(1, damage - enemy.data.armor)
+func chain_lightning(first: AlienBug, origin: Vector2, damage: float, color: Color) -> void:
+	var visited: Array[AlienBug] = []
+	var target := first
+	var previous := origin
+	for bounce in 4:
+		if target == null: break
+		visited.append(target)
+		effects.append({"kind": "shot", "from": previous, "to": target.position, "color": color, "life": 0.22})
+		hit_enemy(target, damage * pow(0.8, bounce), "energy")
+		previous = target.position
+		target = null
+		var nearest := 44.0
+		for other in enemies:
+			if visited.has(other) or other.hp <= 0 or other.emerging > 0: continue
+			var distance := previous.distance_to(other.position)
+			if distance < nearest:
+				nearest = distance
+				target = other
+
+func hit_enemy(enemy: AlienBug, damage: float, mode: String = "normal") -> void:
+	if enemy.hp <= 0 or enemy.emerging > 0: return
+	enemy.since_hit = 0.0
+	var remaining := damage
+	if mode != "piercing" and enemy.shield_hp > 0:
+		var factor := 2.0 if mode == "energy" else 1.0
+		var absorbed := minf(enemy.shield_hp, remaining * factor)
+		enemy.shield_hp -= absorbed
+		remaining -= absorbed / factor
+	if remaining > 0:
+		enemy.hp -= remaining if mode == "piercing" else maxf(1, remaining - enemy.data.armor)
 	if enemy.hp <= 0:
 		kills += 1
-		alloy += enemy.data.reward
+		if not enemy.summoned: alloy += enemy.data.reward
 		effects.append({"kind": "death", "to": enemy.position, "color": enemy.data.tint, "life": 0.3})
 
 func finish(won: bool) -> void:
@@ -435,7 +584,7 @@ func finish(won: bool) -> void:
 	best = maxi(best, cleared)
 	save_settings()
 	board.position = Vector2(12, 64)
-	var summary := "存活 %02d:%02d   /   击杀 %d   /   通过 %d / 10 波\n最高纪录：%d 波\n\n%s" % [int(elapsed) / 60, int(elapsed) % 60, kills, cleared, best, "撤离成功！前哨的研究资料已安全带回。" if won else "核心已失守。试试保护采矿机，搭配火炮与减速塔。"]
+	var summary := "存活 %02d:%02d   /   击杀 %d   /   通过 %d / 10 波\n最高纪录：%d 波\n\n%s" % [int(elapsed) / 60, int(elapsed) % 60, kills, cleared, best, "撤离成功！前哨的研究资料已安全带回。" if won else "核心已失守。注意地下突袭和远程虫，试试搭配电弧与轨道狙击塔。"]
 	show_overlay("撤离成功" if won else "信号中断", summary, "再来一局")
 	refresh_ui()
 
@@ -448,8 +597,6 @@ func refresh_ui() -> void:
 	for i in build_buttons.size():
 		build_buttons[i].modulate = Color("6ef2cc") if selected_type == i else Color.WHITE
 	var tower := selected_tower()
-	upgrade_button.disabled = true
-	repair_button.disabled = true
 	sell_button.disabled = tower == null
 	if tower != null:
 		var cost := tower.upgrade_cost()
@@ -460,14 +607,23 @@ func refresh_ui() -> void:
 		var refund := floori(tower.invested * 0.65 * tower.hp / tower.max_health())
 		sell_button.text = "出售 +%d" % refund
 	else:
-		details.text = "点击建筑查看详情\n基础补给：每 5 秒 +2 合金"
+		upgrade_button.disabled = true
+		repair_button.disabled = true
+		details.text = "击杀 + 过波获得合金\n回收站每过波额外 +12"
 		sell_button.text = "出售"
 	pause_button.text = "继续" if paused else "暂停"
 	next_button.disabled = phase != Phase.PREPARE or paused
 	var direction := ""
 	for side in board.approach_sides:
 		direction += ["北 ", "东 ", "南 ", "西 "][side]
-	hint.text = "来袭方向：%s  |  1—5 选建筑 · 右键取消\n空格 暂停布防 · Enter 迎战 · 点击建筑管理" % direction
+	var intel: WaveData = waves[mini(wave, waves.size() - 1)] if phase == Phase.PREPARE else waves[maxi(0, wave - 1)]
+	var threats := "普通虫"
+	if intel.armored_ratio > 0: threats += " / 重甲"
+	if intel.burrow_ratio > 0: threats += " / 地下突袭"
+	if intel.spitter_ratio > 0: threats += " / 腐蚀远程"
+	if intel.shield_ratio > 0: threats += " / 护盾"
+	if intel.boss: threats += " / 巢母"
+	hint.text = "来袭：%s · %s\n1—7 选建筑 · 空格暂停 · Enter迎战 · 右键取消" % [direction, threats]
 
 func draw_effects() -> void:
 	if board == null: return

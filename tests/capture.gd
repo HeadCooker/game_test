@@ -5,6 +5,12 @@ func capture() -> void:
 	var game = load("res://scenes/main.tscn").instantiate()
 	root.add_child(game)
 	game.set_process(false)
+	if OS.get_cmdline_user_args().has("--menu"):
+		await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://build/preview-menu.png")
+		quit()
+		return
 	game.started = true
 	game.overlay.hide()
 	game.alloy = 900

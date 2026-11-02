@@ -3,8 +3,8 @@
 [resource]
 script = ExtResource("1")
 key = "miner"
-title = "采矿机"
-cost = 60
+title = "回收站"
+cost = 65
 health = 80.0
 damage = 0.0
 radius = 0.0
