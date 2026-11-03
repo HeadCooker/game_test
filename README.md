@@ -4,13 +4,16 @@
 
 ## 从这里开始
 
+**同学试玩：Windows 10/11 64位，克隆本仓库后双击根目录的 `开始游戏.cmd` 即可。无需安装 Godot、无需编译、无需下载开发工具。** 首次运行会自动解压仓库自带的游戏包，稍等片刻即可进入游戏；更新仓库后再次双击也会自动更新游戏文件，保留个人存档。
+
+不使用 Git 的同学，可以在 GitHub 点击 **Code → Download ZIP**，完整解压文件夹后双击 `开始游戏.cmd`。也可以只下载 `release/AlienEvacuation-Windows-x64.zip`，解压后运行其中的 `AlienEvacuation.exe`，保留同目录的 PCK 文件。请勿只下载单个启动脚本。
+
 1. 退出旧游戏窗口，双击根目录的 **开始游戏.cmd**。
 2. 新版首先进入“渡鸦号 / 防务舰桥”，选择档案，再进入 **战役**。
 3. 点击第一颗金色任务节点或“01 坠落信号”，阅读简报，在配置页点击出发。页面内容较长时可用鼠标滚轮。
 4. 第一关只有机枪、围墙与采矿机。过关逐步解锁装备，第三关开放远征，第六关完成故事并开放困难远征。
 
-直接启动程序：`build/AlienEvacuation.exe`。
-分享时发送 `build/AlienEvacuation-Windows-x64.zip`，让对方完整解压再运行。EXE 旁的 PCK 必须保留。
+自动解压后的程序位于 `build/player/AlienEvacuation.exe`。可分享的独立包为 `release/AlienEvacuation-Windows-x64.zip`。
 
 ## 一局之外
 
@@ -98,7 +101,7 @@ git push
 
 首次自己提交前，用 `git config user.name "你的名字"` 和 `git config user.email "你的 GitHub 提交邮箱"` 设置本项目的作者身份。Git 的新安装可能需要重新打开终端才能出现在 PATH 中；也可以用完整安装路径运行。
 
-远端仓库：[HeadCooker/game_test](https://github.com/HeadCooker/game_test)。引擎、导出模板、测试存档和构建产物不提交到 GitHub。
+远端仓库：[HeadCooker/game_test](https://github.com/HeadCooker/game_test)。仓库包含源码和已编译的 Windows 游戏压缩包；引擎、导出模板、测试存档与解压缓存不提交。维护者运行 `tools/export.ps1` 后会同步更新 `release/` 中的试玩包，再一起提交即可。
 
 ## 当前边界
 

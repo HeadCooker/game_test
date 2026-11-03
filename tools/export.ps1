@@ -15,3 +15,5 @@ if ($packExit -ne 0 -or (($packLog -join "`n") -match 'SCRIPT ERROR|ERROR:') -or
 Copy-Item 'LICENSES' 'build' -Recurse -Force
 Copy-Item 'docs/试玩说明.txt' 'build/试玩说明.txt' -Force
 Compress-Archive -Path 'build/AlienEvacuation.exe', 'build/AlienEvacuation.pck', 'build/LICENSES', 'build/试玩说明.txt' -DestinationPath 'build/AlienEvacuation-Windows-x64.zip' -Force
+New-Item -ItemType Directory -Force 'release' | Out-Null
+Copy-Item 'build/AlienEvacuation-Windows-x64.zip' 'release/AlienEvacuation-Windows-x64.zip' -Force
