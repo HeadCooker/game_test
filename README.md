@@ -87,12 +87,18 @@ powershell -ExecutionPolicy Bypass -File tools/export.ps1
 
 检查使用 `.tools/` 下的隔离用户数据，不修改正式玩家档案。便携引擎和匹配导出模板在 `.tools/`，不需要编译引擎。
 
-便携 Git：`.tools/git/cmd/git.exe`。完成一个小练习后可执行：
+使用电脑正式安装的 Git（本机位于 `C:/Program Files/Git/cmd/git.exe`）。在项目目录完成一个小练习后可执行：
 
 ```powershell
-& .tools/git/cmd/git.exe add .
-& .tools/git/cmd/git.exe -c user.name="Game Creator" -c user.email="creator@local.invalid" commit -m "Adjust first mission"
+git status
+git add .
+git commit -m "Adjust first mission"
+git push
 ```
+
+首次自己提交前，用 `git config user.name "你的名字"` 和 `git config user.email "你的 GitHub 提交邮箱"` 设置本项目的作者身份。Git 的新安装可能需要重新打开终端才能出现在 PATH 中；也可以用完整安装路径运行。
+
+远端仓库：[HeadCooker/game_test](https://github.com/HeadCooker/game_test)。引擎、导出模板、测试存档和构建产物不提交到 GitHub。
 
 ## 当前边界
 
