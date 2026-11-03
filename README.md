@@ -1,4 +1,4 @@
-# 异星撤离 / Alien Evacuation · v0.3
+# 异星撤离 / Alien Evacuation · v0.3.1
 
 Windows 单机塔防学习项目。固定使用 **Godot 4.7.2 stable / GDScript / Compatibility**。
 
@@ -85,3 +85,7 @@ powershell -ExecutionPolicy Bypass -File tools/export.ps1
 ```
 
 这里的作者信息只对该次本地提交生效，不修改系统设置，也不会上传网络。验证范围和性能样本见 `docs/验证记录.md`。
+
+## v0.3.1 显示改进
+
+护盾怪上方蓝条表示护盾、橙条表示生命，护盾耗尽时保留空轨道。点击已建炮塔显示攻击范围，升级后自动更新；右键或 Esc 取消选择。范围与实际攻击共用射程计算。144 项检查通过，新增选中、升级、取消与移除时的范围显示验证，并在实际渲染器检查满盾、半盾、空盾画面。

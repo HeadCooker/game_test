@@ -23,6 +23,9 @@ func max_health() -> float:
 func upgrade_cost() -> int:
 	return int(data.cost * (0.8 + level * 0.4))
 
+func attack_radius() -> float:
+	return data.radius + (level - 1) * 8 if data.damage > 0 else 0.0
+
 func _draw() -> void:
 	var color := data.tint.lightened(0.65) if hit_flash > 0 else data.tint
 	draw_rect(Rect2(-7, -6, 14, 13), Color("080e18"))

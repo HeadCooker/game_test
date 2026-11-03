@@ -151,6 +151,8 @@ func feedback_checks() -> void:
 	game.place_building(Vector2i(13, 7), 0)
 	game.board.selected = Vector2i(13, 7)
 	game.refresh_ui()
+	game.update_preview()
+	check(game.board.selected_radius == game.selected_tower().attack_radius(), "Selected tower shows its actual combat radius")
 	# Real press / release separated by repeated UI updates reproduces the old bug.
 	var press := InputEventMouseButton.new()
 	press.button_index = MOUSE_BUTTON_LEFT
@@ -165,6 +167,18 @@ func feedback_checks() -> void:
 	root.push_input(release)
 	await process_frame
 	check(game.selected_tower().level == 2 and not game.paused, "Unpaused preparation upgrade works through a real UI click")
+	game.update_preview()
+	check(game.board.selected_radius == game.BUILDINGS[0].radius + 8, "Selected range follows an upgrade while unpaused")
+	game.choose_building(3)
+	game.update_preview()
+	check(game.board.selected_radius == 0, "Choosing a new building clears the old range")
+	game.place_building(Vector2i(8, 8), 3)
+	game.board.selected = Vector2i(8, 8)
+	game.update_preview()
+	check(game.board.selected_radius == 0, "Walls do not show an attack radius")
+	game.sell_selected()
+	game.update_preview()
+	check(game.board.selected == Vector2i(-1, -1) and game.board.selected_radius == 0, "Removing a selected building clears its indicator")
 	var before_wait: int = game.alloy
 	game._process(5.0)
 	check(game.alloy == before_wait, "Waiting during preparation generates no income")

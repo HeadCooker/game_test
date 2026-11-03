@@ -14,6 +14,7 @@ var hover := Vector2i(-1, -1)
 var preview_color := Color.TRANSPARENT
 var selected := Vector2i(-1, -1)
 var preview_radius := 0.0
+var selected_radius := 0.0
 var approach_sides: PackedInt32Array = PackedInt32Array([0])
 
 func _ready() -> void:
@@ -111,4 +112,7 @@ func _draw() -> void:
 		if preview_radius > 0:
 			draw_arc(center(hover), preview_radius, 0, TAU, 48, Color(0.4, 0.9, 0.8, 0.4))
 	if inside(selected):
+		if selected_radius > 0:
+			draw_circle(center(selected), selected_radius, Color(0.35, 0.9, 0.8, 0.06))
+			draw_arc(center(selected), selected_radius, 0, TAU, 64, Color(0.45, 1, 0.85, 0.8), 1)
 		draw_rect(Rect2(Vector2(selected * CELL), Vector2.ONE * CELL), Color("ffffff"), false)

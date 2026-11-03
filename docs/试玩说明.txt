@@ -1,4 +1,4 @@
-异星撤离 · Windows x64 v0.3 玩法原型
+异星撤离 · Windows x64 v0.3.1 玩法原型
 
 先完整解压，再运行 AlienEvacuation.exe。
 AlienEvacuation.pck 必须保留在 exe 旁边。不需要安装 Godot。
@@ -16,3 +16,5 @@ AlienEvacuation.pck 必须保留在 exe 旁边。不需要安装 Godot。
 引擎与第三方许可见 LICENSES 文件夹。
 
 本版增加怪物扑击、爪痕、腐蚀弹与建筑受击闪光，并缓和第四波重甲难度。
+
+护盾怪上方蓝条是护盾、橙条是生命。点击炮塔显示其攻击范围，升级后同步更新，右键取消。

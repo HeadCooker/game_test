@@ -119,7 +119,7 @@ func button_at(parent: Node, text: String, pos: Vector2, size: Vector2, action: 
 func make_ui() -> void:
 	var canvas := CanvasLayer.new()
 	add_child(canvas)
-	label_at(canvas, "异星撤离 / OUTPOST 07 · v0.3", Vector2(12, 6), Vector2(300, 20), 16)
+	label_at(canvas, "异星撤离 / OUTPOST 07 · v0.3.1", Vector2(12, 6), Vector2(300, 20), 16)
 	hud = label_at(canvas, "", Vector2(12, 30), Vector2(620, 28), 12)
 	label_at(canvas, "防御部署", Vector2(474, 62), Vector2(155, 20), 13)
 	var display_order := [0, 1, 2, 3, 4, 5, 6]
@@ -287,6 +287,7 @@ func sell_selected() -> void:
 
 func remove_building(tower: DefenseTower) -> void:
 	board.buildings.erase(tower.cell)
+	if board.selected == tower.cell: board.selected = Vector2i(-1, -1)
 	tower.queue_free()
 	board.rebuild_routes()
 	status_changed.emit()
@@ -374,6 +375,8 @@ func grant_clear_reward() -> void:
 	economy_changed.emit()
 
 func update_preview() -> void:
+	var tower := selected_tower()
+	board.selected_radius = tower.attack_radius() if tower != null else 0.0
 	board.hover = board.cell_at(board.get_local_mouse_position())
 	board.preview_color = Color.TRANSPARENT
 	board.preview_radius = 0
@@ -385,7 +388,7 @@ func update_preview() -> void:
 		if data.key == "miner" and station_count() >= MINER_LIMIT: valid = false
 		board.preview_color = Color(0.3, 0.9, 0.7, 0.4) if valid else Color(1, 0.3, 0.3, 0.4)
 		board.preview_radius = data.radius
-	var signature: Array = [board.hover, board.preview_color, board.preview_radius, board.selected, board.approach_sides]
+	var signature: Array = [board.hover, board.preview_color, board.preview_radius, board.selected, board.selected_radius, board.approach_sides]
 	if signature != preview_signature:
 		preview_signature = signature
 		board.queue_redraw()
@@ -535,7 +538,7 @@ func update_towers(delta: float) -> void:
 			tower.queue_redraw()
 			continue
 		var target: AlienBug = null
-		var radius := tower.data.radius + (tower.level - 1) * 8
+		var radius := tower.attack_radius()
 		var best_score := -INF
 		for enemy in enemies:
 			var distance := tower.position.distance_to(enemy.position)

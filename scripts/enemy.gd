@@ -55,6 +55,11 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, s + 3, 0, TAU, 12, Color("7bbdff"), 1)
 	if data.ability == "boss" and hp < max_hp * 0.5:
 		draw_arc(Vector2.ZERO, s + 2, 0, TAU, 12, Color("ff4c54"), 2)
-	if hp < max_hp:
-		draw_rect(Rect2(-s, -s - 4, s * 2, 1), Color("552c3a"))
-		draw_rect(Rect2(-s, -s - 4, s * 2 * maxf(0, hp / max_hp), 1), Color("e5ac79"))
+	# Shielded enemies always show both bars, including the empty shield track.
+	var bar_width := maxf(12, s * 2)
+	if max_shield > 0:
+		draw_rect(Rect2(-bar_width / 2, -s - 8, bar_width, 2), Color("233c58"))
+		draw_rect(Rect2(-bar_width / 2, -s - 8, bar_width * clampf(shield_hp / max_shield, 0, 1), 2), Color("73caff"))
+	if hp < max_hp or max_shield > 0:
+		draw_rect(Rect2(-bar_width / 2, -s - 5, bar_width, 2), Color("552c3a"))
+		draw_rect(Rect2(-bar_width / 2, -s - 5, bar_width * clampf(hp / max_hp, 0, 1), 2), Color("e5ac79"))

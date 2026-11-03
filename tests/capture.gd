@@ -41,6 +41,18 @@ func capture() -> void:
 		game.update_enemies(0.05)
 		for effect in game.effects: effect.life -= 0.06
 		game.effect_layer.queue_redraw()
+	if OS.get_cmdline_user_args().has("--indicators"):
+		for enemy: AlienBug in game.enemies: enemy.hp = 0
+		game.update_towers(0.0)
+		game.effects.clear()
+		for i in 3:
+			var shield: AlienBug = game.spawn_enemy(game.waves[0], 6)
+			shield.position = game.board.center(Vector2i(10 + i * 3, 7))
+			shield.shield_hp = shield.max_shield * (1.0 - i * 0.5)
+			shield.hp = shield.max_hp * 0.75
+		game.selected_type = -1
+		game.board.selected = Vector2i(14, 5)
+		game.update_preview()
 	game.toggle_pause()
 	game.refresh_ui()
 	await process_frame
