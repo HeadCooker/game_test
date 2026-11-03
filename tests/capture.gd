@@ -24,6 +24,23 @@ func capture() -> void:
 	game.board.approach_sides = game.waves[5].sides
 	game.start_wave()
 	for i in 180: game._process(0.1)
+	if OS.get_cmdline_user_args().has("--combat"):
+		for enemy: AlienBug in game.enemies: enemy.hp = 0
+		game.update_towers(0.0)
+		game.effects.clear()
+		game.place_building(Vector2i(5, 9), 3)
+		var attacker: AlienBug = game.spawn_enemy(game.waves[0], 0)
+		attacker.lane_offset = Vector2.ZERO
+		attacker.position = game.board.center(Vector2i(5, 8)) + Vector2(0, -0.3)
+		attacker.route_from = Vector2i(5, 8)
+		attacker.destination = Vector2i(5, 9)
+		var ranged: AlienBug = game.spawn_enemy(game.waves[0], 5)
+		ranged.position = game.board.center(Vector2i(5, 6))
+		ranged.destination = Vector2i(5, 6)
+		game.update_enemies(0.05)
+		game.update_enemies(0.05)
+		for effect in game.effects: effect.life -= 0.06
+		game.effect_layer.queue_redraw()
 	game.toggle_pause()
 	game.refresh_ui()
 	await process_frame

@@ -6,6 +6,7 @@ const WIDTH := 28
 const HEIGHT := 16
 const CORE := Vector2i(14, 8)
 var buildings: Dictionary = {}
+var hit_flash := 0.0
 var distance: Dictionary = {}
 var route_fields: Array[Dictionary] = []
 const STEPS = [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN, Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]
@@ -103,7 +104,7 @@ func _draw() -> void:
 		draw_circle(p, 4, Color("ff8b64"))
 	var p := center(CORE)
 	draw_rect(Rect2(p - Vector2(7, 7), Vector2(14, 14)), Color("293e55"))
-	draw_rect(Rect2(p - Vector2(4, 5), Vector2(8, 10)), Color("65e5ee"))
+	draw_rect(Rect2(p - Vector2(4, 5), Vector2(8, 10)), Color("ffae91") if hit_flash > 0 else Color("65e5ee"))
 	draw_rect(Rect2(p - Vector2(2, 3), Vector2(4, 6)), Color("d9fcf4"))
 	if inside(hover) and preview_color.a > 0:
 		draw_rect(Rect2(Vector2(hover * CELL), Vector2.ONE * CELL), preview_color)

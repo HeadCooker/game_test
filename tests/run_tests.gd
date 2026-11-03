@@ -72,6 +72,7 @@ func run() -> void:
 	breaker.destination = wall_cell
 	game.update_enemies(0.1)
 	check(not game.board.buildings.has(wall_cell), "Enemy destroys a blocking wall")
+	check(breaker.attack_flash > 0 and game.effects.any(func(fx: Dictionary): return fx.kind == "claw"), "Melee attacks produce a lunge and claw impact")
 	var before_move := breaker.position
 	game.update_enemies(0.1)
 	check(breaker.position != before_move, "Enemy resumes movement after wall destruction")
@@ -170,14 +171,32 @@ func feedback_checks() -> void:
 	game.place_building(Vector2i(10, 8), 4)
 	game.place_building(Vector2i(10, 9), 4)
 	game.place_building(Vector2i(10, 10), 4)
-	check(not game.place_building(Vector2i(10, 11), 4), "Recovery stations capped at three")
+	check(not game.place_building(Vector2i(10, 11), 4), "Miners capped at three")
 	var before_station_wait: int = game.alloy
 	game._process(5.0)
-	check(game.alloy == before_station_wait, "Recovery stations do not produce timed income")
+	check(game.alloy == before_station_wait, "Miners do not produce timed income")
 	game.start_wave()
+	var mining_before: int = game.alloy
+	game.update_mining(5.0)
+	check(game.alloy == mining_before + 12, "Three miners each pay four after five combat seconds")
+	game.paused = true
+	game.update_mining(10.0)
+	check(game.alloy == mining_before + 12, "Paused combat does not mine")
+	game.paused = false
+	game.evacuation = true
+	game.update_mining(10.0)
+	check(game.alloy == mining_before + 12, "Evacuation does not mine")
+	game.evacuation = false
+	game.update_mining(2.5)
+	game.phase = game.Phase.PREPARE
+	game.update_mining(50.0)
+	check(game.alloy == mining_before + 12, "Preparation does not advance partial mining progress")
+	game.phase = game.Phase.ATTACK
+	game.update_mining(2.5)
+	check(game.alloy == mining_before + 24, "Partial combat mining progress carries between waves")
 	var before_clear: int = game.alloy
 	game.grant_clear_reward()
-	check(game.alloy == before_clear + game.waves[0].clear_reward + 36, "Three recovery stations add fixed clear rewards")
+	check(game.alloy == before_clear + game.waves[0].clear_reward, "Wave reward does not include mining payout")
 	var after_clear: int = game.alloy
 	game.grant_clear_reward()
 	check(game.alloy == after_clear, "Wave completion cannot pay twice")
@@ -226,6 +245,7 @@ func feedback_checks() -> void:
 	var tower: DefenseTower = game.board.buildings[Vector2i(13, 7)]
 	var tower_hp: float = tower.hp
 	game.update_enemies(0.1)
+	check(spitter.attack_flash > 0 and tower.hit_flash > 0 and game.effects.any(func(fx: Dictionary): return fx.kind == "acid"), "Ranged attacks show windup, projectile and target hit feedback")
 	check(tower.hp < tower_hp and spitter.position.distance_to(tower.position) > 30, "Spitter attacks structures from range")
 	# Chain should hit nearby targets exactly once and never hit a distant one.
 	for enemy: AlienBug in game.enemies: enemy.hp = 0

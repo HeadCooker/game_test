@@ -7,6 +7,8 @@ var destination := Vector2i(-1, -1)
 var attack_timer := 0.0
 var slow_time := 0.0
 var animation := 0.0
+var attack_flash := 0.0
+var attack_direction := Vector2.ZERO
 var route_from := Vector2i(-1, -1)
 var route_variant := 0
 var lane_offset := Vector2.ZERO
@@ -28,6 +30,7 @@ func waypoint(cell: Vector2i) -> Vector2:
 	return Vector2(cell * BattleBoard.CELL) + Vector2(8, 8) + lane_offset
 
 func _draw() -> void:
+	draw_set_transform(attack_direction * sin(attack_flash / 0.28 * PI) * 3)
 	var s := data.size
 	if emerging > 0:
 		draw_arc(Vector2.ZERO, 6 + sin(animation * 12) * 2, 0, TAU, 12, Color("ff8c67"), 1)
@@ -35,6 +38,7 @@ func _draw() -> void:
 		draw_line(Vector2(3, -3), Vector2(-3, 3), Color("ffd6a0"))
 		return
 	var c := data.tint if slow_time <= 0 else Color("8bc9ff")
+	if attack_flash > 0: c = c.lightened(0.35)
 	var wiggle := sin(animation * 14) * 1.5
 	for side in [-1, 1]:
 		for offset in [-1, 1]:

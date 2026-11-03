@@ -8,6 +8,8 @@ var invested := 0
 var cooldown := 0.0
 var aim := Vector2.UP
 var flash := 0.0
+var hit_flash := 0.0
+var mining_timer := 0.0
 
 func setup(config: BuildingData, grid_cell: Vector2i) -> void:
 	data = config
@@ -22,7 +24,7 @@ func upgrade_cost() -> int:
 	return int(data.cost * (0.8 + level * 0.4))
 
 func _draw() -> void:
-	var color := data.tint
+	var color := data.tint.lightened(0.65) if hit_flash > 0 else data.tint
 	draw_rect(Rect2(-7, -6, 14, 13), Color("080e18"))
 	draw_rect(Rect2(-6, -7, 12, 12), color.darkened(0.45))
 	draw_rect(Rect2(-5, -6, 10, 9), color)
