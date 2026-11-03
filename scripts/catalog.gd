@@ -1,6 +1,15 @@
 class_name GameCatalog
 extends RefCounted
 const TOWER_IDS := [0, 1, 2, 5, 6]
+
+static func normalize_tower_ids(values: Array) -> Array:
+	# JSON numbers are floats; Array.has uses strict numeric types.
+	var result: Array = []
+	for value in values:
+		if not (value is int or value is float): continue
+		var number := int(value)
+		if float(value) == float(number) and TOWER_IDS.has(number) and not result.has(number): result.append(number)
+	return result
 const TOWER_NAMES := {0: "机枪塔", 1: "火炮塔", 2: "减速塔", 5: "电弧塔", 6: "轨道狙击塔"}
 const MODULES := {"": "标准核心：没有额外代价", "scout": "侦察：钻地预警 +1 秒；核心生命 -10%", "industry": "工业：采矿上限 +1；初始合金 -30", "emergency": "应急：每波一次，生命降至30%时花20合金恢复10%"}
 const ACHIEVEMENTS := {"first": "res://data/achievements/first.tres", "depth": "res://data/achievements/depth.tres", "ending": "res://data/achievements/ending.tres", "logs": "res://data/achievements/logs.tres", "shield": "res://data/achievements/shield.tres", "rail": "res://data/achievements/rail.tres", "chain": "res://data/achievements/chain.tres", "untouched": "res://data/achievements/untouched.tres", "extract": "res://data/achievements/extract.tres", "expedition": "res://data/achievements/expedition.tres", "boons": "res://data/achievements/boons.tres", "hard": "res://data/achievements/hard.tres"}

@@ -14,6 +14,8 @@ func run() -> void:
 	for key in GameCatalog.BOON_IDS + GameCatalog.EVENT_IDS:
 		if GameCatalog.card(key) == null: quit(1); return
 	var store = root.get_node("Campaign")
+	# Content validation does not exercise audio; avoid starting the dummy mixer.
+	store.shared.music = false
 	store.slot = 1
 	store.profile = store.fresh()
 	store.begin_mission(1, [0], "")

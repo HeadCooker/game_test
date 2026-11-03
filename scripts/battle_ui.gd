@@ -4,7 +4,7 @@ extends RefCounted
 static func make_ui(game: Node) -> void:
 	var canvas := CanvasLayer.new()
 	game.add_child(canvas)
-	game.label_at(canvas, "异星撤离 · v0.4", Vector2(12, 6), Vector2(300, 20), 16)
+	game.label_at(canvas, "异星撤离 · v0.4.1", Vector2(12, 6), Vector2(300, 20), 16)
 	game.achievement_toast = game.label_at(canvas, "", Vector2(220, 8), Vector2(200, 20), 10)
 	game.hud = game.label_at(canvas, "", Vector2(12, 30), Vector2(620, 28), 12)
 	game.label_at(canvas, "防御部署", Vector2(474, 62), Vector2(155, 20), 13)

@@ -26,3 +26,10 @@ $closeLog = & $engine --headless --path $taskRoot --script tests/close_check.gd 
 $closeExit = $LASTEXITCODE
 $closeLog | Write-Output
 if ($closeExit -ne 0 -or (($closeLog -join "`n") -match 'SCRIPT ERROR|ERROR:') -or (($closeLog -join "`n") -notmatch 'CLOSE CHECK: latest preparation saved')) { throw 'Window close test failed' }
+
+$env:APPDATA = Join-Path $taskRoot '.tools/resume-userdata'
+New-Item -ItemType Directory -Force $env:APPDATA | Out-Null
+$resumeLog = & $engine --headless --path $taskRoot --script tests/resume_build_test.gd --quit-after 600 2>&1
+$resumeExit = $LASTEXITCODE
+$resumeLog | Write-Output
+if ($resumeExit -ne 0 -or (($resumeLog -join "`n") -match 'SCRIPT ERROR|ERROR:') -or (($resumeLog -join "`n") -notmatch 'RESUME FAILURES: 0')) { throw 'Resume building test failed' }

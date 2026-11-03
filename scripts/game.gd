@@ -120,6 +120,7 @@ func configure_mission() -> void:
 	if Campaign.pending.is_empty(): return
 	managed = true
 	request = Campaign.pending.duplicate(true)
+	request.loadout = GameCatalog.normalize_tower_ids(request.loadout)
 	selected_type = int(request.loadout[0])
 	rng.seed = int(request.seed)
 	Campaign.pending = {}

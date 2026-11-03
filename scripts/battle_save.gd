@@ -13,7 +13,8 @@ static func restore(game: Node, snapshot: Dictionary) -> bool:
 	if snapshot.get("version", 0) != 1 or snapshot.get("request_id", "") != game.request.id: return false
 	for field in FIELDS:
 		if snapshot.get("fields", {}).has(field): game.set(field, snapshot.fields[field])
-	game.emergency_waves = snapshot.get("emergency_waves", []).duplicate()
+	game.emergency_waves = []
+	for value in snapshot.get("emergency_waves", []): game.emergency_waves.append(int(value))
 	game.damage_sources = snapshot.get("damage_sources", {}).duplicate()
 	for tower: DefenseTower in game.board.buildings.values(): tower.queue_free()
 	game.board.buildings.clear()

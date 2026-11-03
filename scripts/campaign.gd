@@ -70,6 +70,9 @@ func load_profile(index: int) -> void:
 		DirAccess.copy_absolute(file_path, file_path + ".damaged")
 	if valid_profile(loaded):
 		profile.merge(loaded, true)
+		profile.loadout = GameCatalog.normalize_tower_ids(profile.loadout)
+		for data: Dictionary in [profile.active_request, profile.expedition]:
+			if data.has("loadout"): data.loadout = GameCatalog.normalize_tower_ids(data.loadout)
 	else:
 		notice += " 无可用备份，使用空档案。"
 
@@ -143,6 +146,7 @@ func valid_loadout(loadout: Array, module: String) -> bool:
 
 func begin_mission(index: int, loadout: Array, module: String, choice := "crew") -> bool:
 	if index < 1 or index > 6 or not unlocked(index) or not valid_loadout(loadout, module): return false
+	loadout = GameCatalog.normalize_tower_ids(loadout)
 	profile.loadout = loadout.duplicate()
 	profile.module = module
 	pending = {"mode": "campaign", "mission": index, "loadout": loadout.duplicate(), "module": module, "choice": choice, "id": id(), "seed": str(randi())}
@@ -154,6 +158,7 @@ func begin_mission(index: int, loadout: Array, module: String, choice := "crew")
 func continue_battle() -> bool:
 	if profile.active_request.is_empty(): return false
 	pending = profile.active_request.duplicate(true)
+	pending.loadout = GameCatalog.normalize_tower_ids(pending.loadout)
 	resume_snapshot = profile.suspend.duplicate(true)
 	return true
 
@@ -203,6 +208,7 @@ func settle(result: Dictionary) -> bool:
 
 func start_expedition(loadout: Array, module: String, hard: bool) -> bool:
 	if not profile.records.has("3") or (hard and not profile.records.has("6")) or not valid_loadout(loadout, module): return false
+	loadout = GameCatalog.normalize_tower_ids(loadout)
 	var random := RandomNumberGenerator.new()
 	random.randomize()
 	var run_seed := str(random.seed)

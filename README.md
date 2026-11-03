@@ -1,4 +1,4 @@
-# 异星撤离 / Alien Evacuation · v0.4
+# 异星撤离 / Alien Evacuation · v0.4.1
 
 六关剧情塔防 + 三站随机远征的 Windows 单机原型。固定使用 Godot 4.7.2 stable、GDScript、Compatibility。
 
@@ -100,3 +100,7 @@ powershell -ExecutionPolicy Bypass -File tools/export.ps1
 3–5小时战役和25–35分钟远征是设计目标，尚未由真人验证；提前迎战会明显缩短时长。没有支付上架费或上传发行平台。
 
 本次交付与验证记录见 `docs/v0.4更新说明.md`。Godot 和第三方声明见 `LICENSES/`。
+
+### v0.4.1 修复
+
+修复档案读盘后炮塔编号变成浮点数、被误判为未携带而禁用的问题；战役和远征继续游戏均自动兼容旧档案，无需新建档案。准备快照中的应急模块波次编号也统一恢复为整数，避免已使用次数误判。

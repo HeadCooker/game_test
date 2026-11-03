@@ -119,7 +119,7 @@ func show_page(next: String) -> void:
 	if page != "brief": ui_notice = ""
 	for child in content.get_children(): content.remove_child(child); child.queue_free()
 	header.text = "渡鸦号 / " + {"bridge": "防务舰桥", "missions": "任务星图", "brief": "出战配置", "expedition": "随机远征", "equipment": "装备库", "archive": "通讯档案", "achievements": "成就", "shop": "外观目录", "settings": "设置", "confirm": "确认操作"}.get(page, "指挥终端")
-	footer.text = "v0.4 · 档案 %d · 战役 %d/6 · 已入库徽记 %d%s" % [Campaign.slot, Campaign.profile.records.size(), Campaign.profile.badges, " · ◆渡鸦" if Campaign.profile.cosmetics.get("badge", "") == "bridge_raven" else ""]
+	footer.text = "v0.4.1 · 档案 %d · 战役 %d/6 · 已入库徽记 %d%s" % [Campaign.slot, Campaign.profile.records.size(), Campaign.profile.badges, " · ◆渡鸦" if Campaign.profile.cosmetics.get("badge", "") == "bridge_raven" else ""]
 	match page:
 		"bridge": bridge_page()
 		"missions": mission_page()

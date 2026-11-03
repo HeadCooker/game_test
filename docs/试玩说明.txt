@@ -1,4 +1,4 @@
-异星撤离 · v0.4 Windows x64
+异星撤离 · v0.4.1 Windows x64
 
 完整解压后运行 AlienEvacuation.exe，PCK 必须在旁边。不需要安装 Godot。
 
