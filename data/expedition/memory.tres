@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "memory"
+title = "记忆残片"
+description = "一个名字出现在所有被删除的名册里。"
+effects = {}
+choices = PackedStringArray("保留碎片：徽记 +5", "拆解终端：核心 +45")
+alternatives = Array[Dictionary]([{"stash": 5}, {"core": 45}])

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "distress"
+title = "失真的求救"
+description = "舱门后只有一台仍在工作的维护机。"
+effects = {}
+choices = PackedStringArray("拆回装甲：后续核心 +60", "回收信标：未带回徽记 +10")
+alternatives = Array[Dictionary]([{"core": 60}, {"stash": 10}])

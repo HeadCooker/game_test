@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "scrap"
+title = "废料带"
+description = "旧前哨的物资箱还没有被腐蚀。"
+effects = {}
+choices = PackedStringArray("回收合金：初始合金 +30", "加固围墙：围墙生命 +20%")
+alternatives = Array[Dictionary]([{"alloy": 30}, {"wall": 0.2}])

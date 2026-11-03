@@ -1,0 +1,170 @@
+[gd_resource type="Resource" script_class="MissionData" load_steps=13 format=3]
+[ext_resource type="Script" path="res://scripts/mission_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/wave_data.gd" id="w"]
+
+[sub_resource type="Resource" id="wave_0"]
+script = ExtResource("w")
+count = 21
+spawn_interval = 1.25
+preparation = 40.0
+health_multiplier = 1.20
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 52
+
+[sub_resource type="Resource" id="wave_1"]
+script = ExtResource("w")
+count = 24
+spawn_interval = 1.18
+preparation = 40.0
+health_multiplier = 1.32
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 59
+
+[sub_resource type="Resource" id="wave_2"]
+script = ExtResource("w")
+count = 27
+spawn_interval = 1.11
+preparation = 40.0
+health_multiplier = 1.44
+fast_ratio = 0.18
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 66
+
+[sub_resource type="Resource" id="wave_3"]
+script = ExtResource("w")
+count = 30
+spawn_interval = 1.04
+preparation = 40.0
+health_multiplier = 1.56
+fast_ratio = 0.18
+armored_ratio = 0.12
+burrow_ratio = 0.1
+spitter_ratio = 0.12
+shield_ratio = 0
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 73
+
+[sub_resource type="Resource" id="wave_4"]
+script = ExtResource("w")
+count = 33
+spawn_interval = 0.97
+preparation = 40.0
+health_multiplier = 1.68
+fast_ratio = 0.18
+armored_ratio = 0.12
+burrow_ratio = 0.1
+spitter_ratio = 0.12
+shield_ratio = 0.12
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 80
+
+[sub_resource type="Resource" id="wave_5"]
+script = ExtResource("w")
+count = 36
+spawn_interval = 0.90
+preparation = 40.0
+health_multiplier = 1.80
+fast_ratio = 0.18
+armored_ratio = 0.12
+burrow_ratio = 0.1
+spitter_ratio = 0.12
+shield_ratio = 0.12
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 87
+
+[sub_resource type="Resource" id="wave_6"]
+script = ExtResource("w")
+count = 39
+spawn_interval = 0.83
+preparation = 40.0
+health_multiplier = 1.92
+fast_ratio = 0.18
+armored_ratio = 0.12
+burrow_ratio = 0.1
+spitter_ratio = 0.12
+shield_ratio = 0.12
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 94
+
+[sub_resource type="Resource" id="wave_7"]
+script = ExtResource("w")
+count = 42
+spawn_interval = 0.76
+preparation = 40.0
+health_multiplier = 2.04
+fast_ratio = 0.18
+armored_ratio = 0.12
+burrow_ratio = 0.1
+spitter_ratio = 0.12
+shield_ratio = 0.12
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 101
+
+[sub_resource type="Resource" id="wave_8"]
+script = ExtResource("w")
+count = 45
+spawn_interval = 0.69
+preparation = 40.0
+health_multiplier = 2.16
+fast_ratio = 0.18
+armored_ratio = 0.12
+burrow_ratio = 0.1
+spitter_ratio = 0.12
+shield_ratio = 0.12
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = false
+clear_reward = 108
+
+[sub_resource type="Resource" id="wave_9"]
+script = ExtResource("w")
+count = 48
+spawn_interval = 0.62
+preparation = 40.0
+health_multiplier = 2.28
+fast_ratio = 0.18
+armored_ratio = 0.12
+burrow_ratio = 0.1
+spitter_ratio = 0.12
+shield_ratio = 0.12
+sides = PackedInt32Array(0, 1, 2, 3)
+boss = true
+clear_reward = 115
+
+[resource]
+script = ExtResource("1")
+id = "6"
+title = "黑色黎明"
+briefing = "指挥官：摧毁信标的代价是整个地面网络。我们也许能离开，但不是所有人。\n目标：守住十波、击败巢母并等待30秒发射。可选：核心以至少80%生命完成任务。\n巢母会召唤无合金奖励的援军，半血后加速，配置穿甲与范围火力。"
+log_main = "《最后一次点火》\n指挥官：信标网络已经断开。渡鸦号离开了地面。被放弃的那些声音仍在最后一段录音里。"
+log_optional = "《最后的灯》\n轮机长：发射场的灯一直亮到我们越过云层。我希望地面的人知道，我们没有忘记他们。"
+waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_1"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_4"), SubResource("wave_5"), SubResource("wave_6"), SubResource("wave_7"), SubResource("wave_8"), SubResource("wave_9")])
+rocks = PackedVector2Array(4, 4, 4, 5, 4, 6, 4, 9, 4, 10, 4, 11, 23, 4, 23, 5, 23, 6, 23, 9, 23, 10, 23, 11)
+forbidden = PackedVector2Array(10, 2, 11, 2, 12, 2, 13, 2, 14, 2, 15, 2, 16, 2, 17, 2)
+marker = Vector2i(-1, -1)
+mining_required = 0
+optional_rule = "core80"
+reward_tower = -1
+reward_module = ""
+tint = Color(0.13,0.1,0.1,1)

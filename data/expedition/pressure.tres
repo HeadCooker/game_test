@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "pressure"
+title = "重压通道"
+description = "捷径穿过一片活跃的孵化区。"
+effects = {}
+choices = PackedStringArray("穿越孵化区：敌人生命 +10%，徽记 +10", "绕开：没有额外收益")
+alternatives = Array[Dictionary]([{"enemy_health": 0.1, "stash": 10}, {}])

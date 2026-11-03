@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "reactor"
+title = "反应堆余热"
+description = "一座反应堆还有最后一点输出。"
+effects = {}
+choices = PackedStringArray("接入钻头：每次采矿 +1", "拆解：初始合金 +40，核心 -60")
+alternatives = Array[Dictionary]([{"mining": 1}, {"alloy": 40, "core": -60}])

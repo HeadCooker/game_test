@@ -1,5 +1,8 @@
 class_name DefenseTower
 extends Node2D
+var range_bonus := 0.0
+var health_multiplier := 1.0
+var cosmetic_tint := Color.TRANSPARENT
 var data: BuildingData
 var cell: Vector2i
 var hp: float
@@ -18,16 +21,17 @@ func setup(config: BuildingData, grid_cell: Vector2i) -> void:
 	invested = data.cost
 
 func max_health() -> float:
-	return data.health * (1.0 + (level - 1) * 0.4)
+	return data.health * health_multiplier * (1.0 + (level - 1) * 0.4)
 
 func upgrade_cost() -> int:
 	return int(data.cost * (0.8 + level * 0.4))
 
 func attack_radius() -> float:
-	return data.radius + (level - 1) * 8 if data.damage > 0 else 0.0
+	return data.radius + (level - 1) * 8 + range_bonus if data.damage > 0 else 0.0
 
 func _draw() -> void:
-	var color := data.tint.lightened(0.65) if hit_flash > 0 else data.tint
+	var base_color := cosmetic_tint if cosmetic_tint.a > 0 else data.tint
+	var color := base_color.lightened(0.65) if hit_flash > 0 else base_color
 	draw_rect(Rect2(-7, -6, 14, 13), Color("080e18"))
 	draw_rect(Rect2(-6, -7, 12, 12), color.darkened(0.45))
 	draw_rect(Rect2(-5, -6, 10, 9), color)

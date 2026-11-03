@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "fire"
+title = "超频射控"
+description = "本次远征炮塔伤害 +12%。"
+effects = {"damage": 0.12}
+choices = PackedStringArray()
+alternatives = Array[Dictionary]([])

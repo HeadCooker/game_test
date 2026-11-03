@@ -6,6 +6,11 @@ const WIDTH := 28
 const HEIGHT := 16
 const CORE := Vector2i(14, 8)
 var buildings: Dictionary = {}
+var rocks: Dictionary = {}
+var forbidden: Dictionary = {}
+var marker := Vector2i(-1, -1)
+var ground_tint := Color("111f2b")
+var core_tint := Color("65e5ee")
 var hit_flash := 0.0
 var distance: Dictionary = {}
 var route_fields: Array[Dictionary] = []
@@ -31,12 +36,12 @@ func inside(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.y >= 0 and cell.x < WIDTH and cell.y < HEIGHT
 
 func can_build(cell: Vector2i) -> bool:
-	return inside(cell) and cell.x > 0 and cell.y > 0 and cell.x < WIDTH - 1 and cell.y < HEIGHT - 1 and cell != CORE and not buildings.has(cell)
+	return inside(cell) and cell.x > 0 and cell.y > 0 and cell.x < WIDTH - 1 and cell.y < HEIGHT - 1 and cell != CORE and not buildings.has(cell) and not rocks.has(cell) and not forbidden.has(cell)
 
 func diagonal_clear(cell: Vector2i, neighbor: Vector2i) -> bool:
 	var delta := neighbor - cell
 	if delta.x != 0 and delta.y != 0:
-		return not buildings.has(cell + Vector2i(delta.x, 0)) and not buildings.has(cell + Vector2i(0, delta.y))
+		return not buildings.has(cell + Vector2i(delta.x, 0)) and not buildings.has(cell + Vector2i(0, delta.y)) and not rocks.has(cell + Vector2i(delta.x, 0)) and not rocks.has(cell + Vector2i(0, delta.y))
 	return true
 
 func entry_cost(cell: Vector2i) -> float:
@@ -63,7 +68,7 @@ func rebuild_routes() -> void:
 			var cell: Vector2i = open.pop_at(best)
 			for step in STEPS:
 				var neighbor: Vector2i = cell + step
-				if not inside(neighbor) or not diagonal_clear(neighbor, cell): continue
+				if not inside(neighbor) or rocks.has(neighbor) or rocks.has(cell) or not diagonal_clear(neighbor, cell): continue
 				var candidate: float = field[cell] + travel_cost(neighbor, cell, variant)
 				if candidate < field.get(neighbor, INF):
 					field[neighbor] = candidate
@@ -79,7 +84,7 @@ func next_cell(cell: Vector2i, variant: int = 0) -> Vector2i:
 	var best := INF
 	for step in STEPS:
 		var neighbor: Vector2i = cell + step
-		if inside(neighbor) and diagonal_clear(cell, neighbor):
+		if inside(neighbor) and not rocks.has(neighbor) and diagonal_clear(cell, neighbor):
 			var cost: float = field.get(neighbor, INF) + travel_cost(cell, neighbor, variant)
 			if cost < best:
 				best = cost
@@ -87,7 +92,7 @@ func next_cell(cell: Vector2i, variant: int = 0) -> Vector2i:
 	return result
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, WIDTH * CELL, HEIGHT * CELL), Color("111f2b"))
+	draw_rect(Rect2(0, 0, WIDTH * CELL, HEIGHT * CELL), ground_tint)
 	for y in HEIGHT:
 		for x in WIDTH:
 			var cell := Vector2i(x, y)
@@ -97,6 +102,15 @@ func _draw() -> void:
 			if x == 0 or y == 0 or x == WIDTH - 1 or y == HEIGHT - 1:
 				draw_rect(rect, Color("332b36"))
 			draw_rect(rect, Color("1b2c38"), false)
+	for cell: Vector2i in rocks:
+		var origin := Vector2(cell * CELL)
+		draw_rect(Rect2(origin + Vector2(1, 1), Vector2(14, 14)), Color("3a4550"))
+		draw_line(origin + Vector2(2, 3), origin + Vector2(13, 3), Color("6a7882"), 2)
+	for cell: Vector2i in forbidden:
+		var origin := Vector2(cell * CELL)
+		draw_line(origin + Vector2(2, 14), origin + Vector2(14, 2), Color("8c5558"), 2)
+	if inside(marker):
+		draw_rect(Rect2(Vector2(marker * CELL) + Vector2.ONE, Vector2(14, 14)), Color("e9b85e"), false, 2)
 	for side in approach_sides:
 		var p := Vector2(224, 5)
 		if side == 1: p = Vector2(443, 128)
@@ -105,7 +119,7 @@ func _draw() -> void:
 		draw_circle(p, 4, Color("ff8b64"))
 	var p := center(CORE)
 	draw_rect(Rect2(p - Vector2(7, 7), Vector2(14, 14)), Color("293e55"))
-	draw_rect(Rect2(p - Vector2(4, 5), Vector2(8, 10)), Color("ffae91") if hit_flash > 0 else Color("65e5ee"))
+	draw_rect(Rect2(p - Vector2(4, 5), Vector2(8, 10)), Color("ffae91") if hit_flash > 0 else core_tint)
 	draw_rect(Rect2(p - Vector2(2, 3), Vector2(4, 6)), Color("d9fcf4"))
 	if inside(hover) and preview_color.a > 0:
 		draw_rect(Rect2(Vector2(hover * CELL), Vector2.ONE * CELL), preview_color)

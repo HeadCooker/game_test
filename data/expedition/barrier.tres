@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "barrier"
+title = "韧性合金"
+description = "本次远征围墙生命 +30%。"
+effects = {"wall": 0.3}
+choices = PackedStringArray()
+alternatives = Array[Dictionary]([])

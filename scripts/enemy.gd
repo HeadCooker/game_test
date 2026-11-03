@@ -18,6 +18,7 @@ var max_shield := 0.0
 var since_hit := 0.0
 var summon_timer := 6.0
 var summoned := false
+var combat_id := ""
 
 func setup(config: EnemyData, multiplier: float) -> void:
 	data = config

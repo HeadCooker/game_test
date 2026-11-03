@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AchievementData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/achievement_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "ending"
+title = "黑色黎明"
+description = "完成战役"
+category = "剧情"
+target = 1

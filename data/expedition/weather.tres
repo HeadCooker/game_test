@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "weather"
+title = "电离风暴"
+description = "暴风掩盖了星球深处的脉冲。"
+effects = {}
+choices = PackedStringArray("短波射控：射程 +8", "消音部署：敌人速度 -8%")
+alternatives = Array[Dictionary]([{"range": 8}, {"enemy_speed": -0.08}])

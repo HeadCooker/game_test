@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AchievementData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/achievement_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "logs"
+title = "档案员"
+description = "收集十二份日志"
+category = "剧情"
+target = 12

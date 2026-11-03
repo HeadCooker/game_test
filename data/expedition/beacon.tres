@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "beacon"
+title = "地底信标"
+description = "探头提前捕捉到了钻地轨迹。"
+effects = {}
+choices = PackedStringArray("校准探头：钻地预警 +1秒", "保存探头：徽记 +5")
+alternatives = Array[Dictionary]([{"warning": 1}, {"stash": 5}])

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "cargo"
+title = "回收货架"
+description = "后续每场初始合金 +40。"
+effects = {"alloy": 40}
+choices = PackedStringArray()
+alternatives = Array[Dictionary]([])

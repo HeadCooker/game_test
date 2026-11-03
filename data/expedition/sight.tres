@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "sight"
+title = "长波观测"
+description = "本次远征射程 +12。"
+effects = {"range": 12}
+choices = PackedStringArray()
+alternatives = Array[Dictionary]([])

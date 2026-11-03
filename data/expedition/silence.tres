@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ExpeditionCard" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/expedition_card.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "silence"
+title = "寂静频段"
+description = "所有频道在这一刻同时安静了。"
+effects = {}
+choices = PackedStringArray("锁定火控：伤害 +6%", "转移储备：初始合金 +25")
+alternatives = Array[Dictionary]([{"damage": 0.06}, {"alloy": 25}])

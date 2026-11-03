@@ -1,0 +1,110 @@
+[gd_resource type="Resource" script_class="MissionData" load_steps=9 format=3]
+[ext_resource type="Script" path="res://scripts/mission_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/wave_data.gd" id="w"]
+
+[sub_resource type="Resource" id="wave_0"]
+script = ExtResource("w")
+count = 10
+spawn_interval = 1.25
+preparation = 40.0
+health_multiplier = 0.70
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 52
+
+[sub_resource type="Resource" id="wave_1"]
+script = ExtResource("w")
+count = 13
+spawn_interval = 1.18
+preparation = 40.0
+health_multiplier = 0.77
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 59
+
+[sub_resource type="Resource" id="wave_2"]
+script = ExtResource("w")
+count = 16
+spawn_interval = 1.11
+preparation = 40.0
+health_multiplier = 0.84
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 66
+
+[sub_resource type="Resource" id="wave_3"]
+script = ExtResource("w")
+count = 19
+spawn_interval = 1.04
+preparation = 40.0
+health_multiplier = 0.91
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 73
+
+[sub_resource type="Resource" id="wave_4"]
+script = ExtResource("w")
+count = 22
+spawn_interval = 0.97
+preparation = 40.0
+health_multiplier = 0.98
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 80
+
+[sub_resource type="Resource" id="wave_5"]
+script = ExtResource("w")
+count = 25
+spawn_interval = 0.90
+preparation = 40.0
+health_multiplier = 1.05
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 87
+
+[resource]
+script = ExtResource("1")
+id = "1"
+title = "坠落信号"
+briefing = "轮机长：渡鸦号还能撑住，但我们已经失去轨道通讯。\n指挥官：派出无人机，守住这座中继核心。\n目标：守住六波。北、南入口由岩壁分隔。可选：结束时保有一台采矿机。\n操作：1—7选择已携带建筑，左键建造/选中，空格暂停，Enter迎战。"
+log_main = "《失事记录》\n轮机长：导航说这里没有定居点。可在我们坠落前，我听到了地面发来的引导信号。"
+log_optional = "《无人机检修》\n轮机长：这座矿机留下的材料救活了通讯板。我们终于知道该向哪里求救。"
+waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_1"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_4"), SubResource("wave_5")])
+rocks = PackedVector2Array(6, 2, 6, 3, 6, 4, 6, 5, 6, 6, 6, 9, 6, 10, 6, 11, 6, 12, 6, 13, 21, 2, 21, 3, 21, 4, 21, 5, 21, 6, 21, 9, 21, 10, 21, 11, 21, 12, 21, 13)
+forbidden = PackedVector2Array()
+marker = Vector2i(-1, -1)
+mining_required = 0
+optional_rule = "miner"
+reward_tower = 1
+reward_module = ""
+tint = Color(0.07,0.13,0.18,1)

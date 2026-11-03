@@ -1,0 +1,140 @@
+[gd_resource type="Resource" script_class="MissionData" load_steps=11 format=3]
+[ext_resource type="Script" path="res://scripts/mission_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/wave_data.gd" id="w"]
+
+[sub_resource type="Resource" id="wave_0"]
+script = ExtResource("w")
+count = 13
+spawn_interval = 1.25
+preparation = 40.0
+health_multiplier = 0.80
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 52
+
+[sub_resource type="Resource" id="wave_1"]
+script = ExtResource("w")
+count = 16
+spawn_interval = 1.18
+preparation = 40.0
+health_multiplier = 0.88
+fast_ratio = 0
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 59
+
+[sub_resource type="Resource" id="wave_2"]
+script = ExtResource("w")
+count = 19
+spawn_interval = 1.11
+preparation = 40.0
+health_multiplier = 0.96
+fast_ratio = 0.18
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 66
+
+[sub_resource type="Resource" id="wave_3"]
+script = ExtResource("w")
+count = 22
+spawn_interval = 1.04
+preparation = 40.0
+health_multiplier = 1.04
+fast_ratio = 0.18
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 73
+
+[sub_resource type="Resource" id="wave_4"]
+script = ExtResource("w")
+count = 25
+spawn_interval = 0.97
+preparation = 40.0
+health_multiplier = 1.12
+fast_ratio = 0.18
+armored_ratio = 0
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 80
+
+[sub_resource type="Resource" id="wave_5"]
+script = ExtResource("w")
+count = 28
+spawn_interval = 0.90
+preparation = 40.0
+health_multiplier = 1.20
+fast_ratio = 0.18
+armored_ratio = 0.08
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 87
+
+[sub_resource type="Resource" id="wave_6"]
+script = ExtResource("w")
+count = 31
+spawn_interval = 0.83
+preparation = 40.0
+health_multiplier = 1.28
+fast_ratio = 0.18
+armored_ratio = 0.08
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 94
+
+[sub_resource type="Resource" id="wave_7"]
+script = ExtResource("w")
+count = 34
+spawn_interval = 0.76
+preparation = 40.0
+health_multiplier = 1.36
+fast_ratio = 0.18
+armored_ratio = 0.08
+burrow_ratio = 0
+spitter_ratio = 0
+shield_ratio = 0
+sides = PackedInt32Array(0, 2)
+boss = false
+clear_reward = 101
+
+[resource]
+script = ExtResource("1")
+id = "2"
+title = "最后一班接驳"
+briefing = "舰载人工智能：这里的居住记录被删除了。接驳舱里仍有人。\n目标：守住八波，第2、5、8波完成分批接驳。可选：在金色格建炮塔并保护到结束，接回失联的一组。\n后半段出现重甲，火炮可以打击密集目标。"
+log_main = "《乘客名册》\n舰载人工智能：接驳成功。那些人没有被登记为殖民者，他们被列在“试验消耗”一栏。"
+log_optional = "《额外接驳》\n轮机长：观察哨引导了最后一组接驳舱。他们上船时，没有人问为什么我们来得这么晚。"
+waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_1"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_4"), SubResource("wave_5"), SubResource("wave_6"), SubResource("wave_7")])
+rocks = PackedVector2Array(5, 4, 5, 5, 5, 10, 5, 11, 6, 4, 6, 5, 6, 10, 6, 11, 20, 4, 20, 5, 20, 10, 20, 11, 21, 4, 21, 5, 21, 10, 21, 11, 10, 3, 11, 3, 17, 12, 18, 12)
+forbidden = PackedVector2Array()
+marker = Vector2i(10, 6)
+mining_required = 0
+optional_rule = "marker"
+reward_tower = 2
+reward_module = ""
+tint = Color(0.13,0.13,0.16,1)
