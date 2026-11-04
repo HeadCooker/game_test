@@ -4,10 +4,10 @@
 
 [sub_resource type="Resource" id="wave_0"]
 script = ExtResource("w")
-count = 17
-spawn_interval = 1.25
+count = 21
+spawn_interval = 0.94
 preparation = 40.0
-health_multiplier = 1.00
+health_multiplier = 1.0
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -15,14 +15,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 52
+clear_reward = 39
 
 [sub_resource type="Resource" id="wave_1"]
 script = ExtResource("w")
-count = 20
-spawn_interval = 1.18
+count = 25
+spawn_interval = 0.89
 preparation = 40.0
-health_multiplier = 1.12
+health_multiplier = 1.0
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -30,14 +30,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 59
+clear_reward = 44
 
 [sub_resource type="Resource" id="wave_2"]
 script = ExtResource("w")
-count = 23
-spawn_interval = 1.11
+count = 29
+spawn_interval = 0.83
 preparation = 40.0
-health_multiplier = 1.24
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0
 burrow_ratio = 0
@@ -45,14 +45,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 66
+clear_reward = 50
 
 [sub_resource type="Resource" id="wave_3"]
 script = ExtResource("w")
-count = 26
-spawn_interval = 1.04
+count = 32
+spawn_interval = 0.78
 preparation = 40.0
-health_multiplier = 1.36
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -60,14 +60,14 @@ spitter_ratio = 0.12
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 73
+clear_reward = 55
 
 [sub_resource type="Resource" id="wave_4"]
 script = ExtResource("w")
-count = 29
-spawn_interval = 0.97
+count = 36
+spawn_interval = 0.73
 preparation = 40.0
-health_multiplier = 1.48
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -75,14 +75,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 80
+clear_reward = 60
 
 [sub_resource type="Resource" id="wave_5"]
 script = ExtResource("w")
-count = 32
-spawn_interval = 0.90
+count = 40
+spawn_interval = 0.68
 preparation = 40.0
-health_multiplier = 1.60
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -90,14 +90,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 87
+clear_reward = 65
 
 [sub_resource type="Resource" id="wave_6"]
 script = ExtResource("w")
-count = 35
-spawn_interval = 0.83
+count = 44
+spawn_interval = 0.62
 preparation = 40.0
-health_multiplier = 1.72
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -105,14 +105,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 94
+clear_reward = 70
 
 [sub_resource type="Resource" id="wave_7"]
 script = ExtResource("w")
-count = 38
-spawn_interval = 0.76
+count = 48
+spawn_interval = 0.57
 preparation = 40.0
-health_multiplier = 1.84
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -120,14 +120,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 101
+clear_reward = 76
 
 [sub_resource type="Resource" id="wave_8"]
 script = ExtResource("w")
-count = 41
-spawn_interval = 0.69
+count = 51
+spawn_interval = 0.52
 preparation = 40.0
-health_multiplier = 1.96
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -135,16 +135,16 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 108
+clear_reward = 81
 
 [resource]
 script = ExtResource("1")
 id = "4"
 title = "静默阵列"
-briefing = "舰载人工智能：公司并非第一次来这里。阵列每天都在向地下发送信号。\n目标：守住九波。可选：在金色格建炮塔，作为观察哨保护至结束。\n腐蚀虫远程攻击建筑，卫虫会恢复护盾；电弧可快速破盾。"
+briefing = "舰载人工智能：公司并非第一次来这里。阵列每天都在向地下发送信号。\n目标：守住五波。可选：在金色格建炮塔，作为观察哨保护至结束。\n腐蚀虫远程攻击建筑，卫虫会恢复护盾；电弧可快速破盾。"
 log_main = "《静默协议》\n舰载人工智能：公司的记录证明他们知道群体意识的存在。信标不用于求救，而用于刺激它。"
 log_optional = "《阵列旁路》\n指挥官：观察哨记录到一条没有写入公司的通讯链。信号源在我们的飞船上。"
-waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_1"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_4"), SubResource("wave_5"), SubResource("wave_6"), SubResource("wave_7"), SubResource("wave_8")])
+waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_2"), SubResource("wave_4"), SubResource("wave_6"), SubResource("wave_8")])
 rocks = PackedVector2Array(5, 3, 5, 12, 6, 3, 6, 12, 7, 3, 7, 12, 8, 3, 8, 12, 9, 3, 9, 12, 12, 3, 12, 12, 13, 3, 13, 12, 14, 3, 14, 12, 15, 3, 15, 12, 18, 3, 18, 12, 19, 3, 19, 12, 20, 3, 20, 12, 21, 3, 21, 12, 22, 3, 22, 12, 8, 6, 19, 9)
 forbidden = PackedVector2Array()
 marker = Vector2i(17, 10)

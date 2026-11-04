@@ -172,8 +172,8 @@ func feedback_checks() -> void:
 	game.choose_building(3)
 	game.update_preview()
 	check(game.board.selected_radius == 0, "Choosing a new building clears the old range")
-	game.place_building(Vector2i(8, 8), 3)
-	game.board.selected = Vector2i(8, 8)
+	game.place_building(Vector2i(7, 8), 3)
+	game.board.selected = Vector2i(7, 8)
 	game.update_preview()
 	check(game.board.selected_radius == 0, "Walls do not show an attack radius")
 	game.sell_selected()
@@ -192,6 +192,8 @@ func feedback_checks() -> void:
 	game.start_wave()
 	var mining_before: int = game.alloy
 	game.update_mining(5.0)
+	check(game.alloy == mining_before, "Mining must wait for manual collection")
+	for tower in game.board.buildings.values(): game.collect_miner(tower)
 	check(game.alloy == mining_before + 12, "Three miners each pay four after five combat seconds")
 	game.paused = true
 	game.update_mining(10.0)
@@ -207,6 +209,7 @@ func feedback_checks() -> void:
 	check(game.alloy == mining_before + 12, "Preparation does not advance partial mining progress")
 	game.phase = game.Phase.ATTACK
 	game.update_mining(2.5)
+	for tower in game.board.buildings.values(): game.collect_miner(tower)
 	check(game.alloy == mining_before + 24, "Partial combat mining progress carries between waves")
 	var before_clear: int = game.alloy
 	game.grant_clear_reward()
@@ -295,8 +298,8 @@ func feedback_checks() -> void:
 	var navigation = test_game()
 	navigation.alloy = 100000
 	# A vertical wall with a distant gap: attacking is cheaper than a huge detour.
-	for y in range(1, 15): navigation.place_building(Vector2i(12, y), 3)
-	var cell := Vector2i(9, 8)
+	for y in range(1, 15): navigation.place_building(Vector2i(6, y), 3)
+	var cell := Vector2i(3, 8)
 	var breaks_wall := false
 	for i in 50:
 		cell = navigation.board.next_cell(cell)
@@ -332,7 +335,7 @@ func feedback_checks() -> void:
 	var unique := {}
 	for variant in 3:
 		var route := ""
-		cell = Vector2i(2, 2)
+		cell = Vector2i(2, 1)
 		var seen := {}
 		for i in 448:
 			if cell == BattleBoard.CORE: break

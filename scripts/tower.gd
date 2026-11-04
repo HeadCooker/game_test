@@ -13,6 +13,7 @@ var aim := Vector2.UP
 var flash := 0.0
 var hit_flash := 0.0
 var mining_timer := 0.0
+var stored_alloy := 0
 
 func setup(config: BuildingData, grid_cell: Vector2i) -> void:
 	data = config
@@ -38,6 +39,8 @@ func _draw() -> void:
 	if data.key == "wall":
 		draw_line(Vector2(-5, 0), Vector2(5, 0), color.darkened(0.4), 2)
 	elif data.key == "miner":
+		if stored_alloy > 0:
+			draw_circle(Vector2(0, -10), 3, Color("ffe38a"))
 		draw_rect(Rect2(-3, -4, 6, 6), Color("192536"))
 		draw_line(Vector2(-2, 4), Vector2(3, -4), Color("e8c7ff"), 2)
 	else:

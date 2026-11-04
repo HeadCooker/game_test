@@ -4,10 +4,10 @@
 
 [sub_resource type="Resource" id="wave_0"]
 script = ExtResource("w")
-count = 21
-spawn_interval = 1.25
+count = 26
+spawn_interval = 0.94
 preparation = 40.0
-health_multiplier = 1.20
+health_multiplier = 1.0
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -15,14 +15,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 52
+clear_reward = 39
 
 [sub_resource type="Resource" id="wave_1"]
 script = ExtResource("w")
-count = 24
-spawn_interval = 1.18
+count = 30
+spawn_interval = 0.89
 preparation = 40.0
-health_multiplier = 1.32
+health_multiplier = 1.0
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -30,14 +30,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 59
+clear_reward = 44
 
 [sub_resource type="Resource" id="wave_2"]
 script = ExtResource("w")
-count = 27
-spawn_interval = 1.11
+count = 34
+spawn_interval = 0.83
 preparation = 40.0
-health_multiplier = 1.44
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0
 burrow_ratio = 0
@@ -45,14 +45,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 66
+clear_reward = 50
 
 [sub_resource type="Resource" id="wave_3"]
 script = ExtResource("w")
-count = 30
-spawn_interval = 1.04
+count = 38
+spawn_interval = 0.78
 preparation = 40.0
-health_multiplier = 1.56
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -60,14 +60,14 @@ spitter_ratio = 0.12
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 73
+clear_reward = 55
 
 [sub_resource type="Resource" id="wave_4"]
 script = ExtResource("w")
-count = 33
-spawn_interval = 0.97
+count = 41
+spawn_interval = 0.73
 preparation = 40.0
-health_multiplier = 1.68
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -75,14 +75,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 80
+clear_reward = 60
 
 [sub_resource type="Resource" id="wave_5"]
 script = ExtResource("w")
-count = 36
-spawn_interval = 0.90
+count = 45
+spawn_interval = 0.68
 preparation = 40.0
-health_multiplier = 1.80
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -90,14 +90,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 87
+clear_reward = 65
 
 [sub_resource type="Resource" id="wave_6"]
 script = ExtResource("w")
-count = 39
-spawn_interval = 0.83
+count = 49
+spawn_interval = 0.62
 preparation = 40.0
-health_multiplier = 1.92
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -105,14 +105,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 94
+clear_reward = 70
 
 [sub_resource type="Resource" id="wave_7"]
 script = ExtResource("w")
-count = 42
-spawn_interval = 0.76
+count = 52
+spawn_interval = 0.57
 preparation = 40.0
-health_multiplier = 2.04
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -120,14 +120,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 101
+clear_reward = 76
 
 [sub_resource type="Resource" id="wave_8"]
 script = ExtResource("w")
-count = 45
-spawn_interval = 0.69
+count = 56
+spawn_interval = 0.52
 preparation = 40.0
-health_multiplier = 2.16
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -135,14 +135,14 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 108
+clear_reward = 81
 
 [sub_resource type="Resource" id="wave_9"]
 script = ExtResource("w")
-count = 48
-spawn_interval = 0.62
+count = 60
+spawn_interval = 0.46
 preparation = 40.0
-health_multiplier = 2.28
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -150,16 +150,16 @@ spitter_ratio = 0.12
 shield_ratio = 0.12
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = true
-clear_reward = 115
+clear_reward = 86
 
 [resource]
 script = ExtResource("1")
 id = "6"
 title = "黑色黎明"
-briefing = "指挥官：摧毁信标的代价是整个地面网络。我们也许能离开，但不是所有人。\n目标：守住十波、击败巢母并等待30秒发射。可选：核心以至少80%生命完成任务。\n巢母会召唤无合金奖励的援军，半血后加速，配置穿甲与范围火力。"
+briefing = "指挥官：摧毁信标的代价是整个地面网络。我们也许能离开，但不是所有人。\n目标：守住六波、击败巢母并等待30秒发射。可选：核心以至少80%生命完成任务。\n巢母会召唤无合金奖励的援军，半血后加速，配置穿甲与范围火力。"
 log_main = "《最后一次点火》\n指挥官：信标网络已经断开。渡鸦号离开了地面。被放弃的那些声音仍在最后一段录音里。"
 log_optional = "《最后的灯》\n轮机长：发射场的灯一直亮到我们越过云层。我希望地面的人知道，我们没有忘记他们。"
-waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_1"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_4"), SubResource("wave_5"), SubResource("wave_6"), SubResource("wave_7"), SubResource("wave_8"), SubResource("wave_9")])
+waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_2"), SubResource("wave_4"), SubResource("wave_5"), SubResource("wave_7"), SubResource("wave_9")])
 rocks = PackedVector2Array(4, 4, 4, 5, 4, 6, 4, 9, 4, 10, 4, 11, 23, 4, 23, 5, 23, 6, 23, 9, 23, 10, 23, 11)
 forbidden = PackedVector2Array(10, 2, 11, 2, 12, 2, 13, 2, 14, 2, 15, 2, 16, 2, 17, 2)
 marker = Vector2i(-1, -1)

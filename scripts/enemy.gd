@@ -28,7 +28,7 @@ func setup(config: EnemyData, multiplier: float) -> void:
 	shield_hp = max_shield
 
 func waypoint(cell: Vector2i) -> Vector2:
-	return Vector2(cell * BattleBoard.CELL) + Vector2(8, 8) + lane_offset
+	return Vector2(cell * BattleBoard.CELL) + Vector2.ONE * BattleBoard.CELL / 2.0 + lane_offset
 
 func _draw() -> void:
 	draw_set_transform(attack_direction * sin(attack_flash / 0.28 * PI) * 3)
@@ -48,6 +48,8 @@ func _draw() -> void:
 	draw_rect(Rect2(-s + 1, -s + 1, s * 2 - 2, s * 2 - 2), c)
 	draw_rect(Rect2(-2, -s, 1, 2), Color("fff3b7"))
 	draw_rect(Rect2(1, -s, 1, 2), Color("fff3b7"))
+	if data.ability == "split":
+		draw_circle(Vector2.ZERO, 3, Color("ffe98b"))
 	if data.ability == "burrow":
 		draw_line(Vector2(-s, s), Vector2(0, s + 3), Color("e7d9ff"), 2)
 	if data.ability == "spitter":

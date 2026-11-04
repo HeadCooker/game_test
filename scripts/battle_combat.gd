@@ -153,6 +153,7 @@ static func hit_enemy(game: Node, enemy: AlienBug, damage: float, mode: String =
 		enemy.hp -= remaining if mode == "piercing" else maxf(1, remaining - enemy.data.armor)
 	if enemy.hp <= 0:
 		if game.managed and mode == "piercing" and enemy.data == game.BUGS[2] and not enemy.summoned: Campaign.rail_kill(enemy.combat_id)
+		if enemy.data.ability == "split": game.split_enemy(enemy)
 		game.kills += 1
 		if not enemy.summoned: game.alloy += enemy.data.reward
 		game.effects.append({"kind": "death", "to": enemy.position, "color": enemy.data.tint, "life": 0.3})

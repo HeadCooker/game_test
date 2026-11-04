@@ -2,9 +2,9 @@ class_name BattleBoard
 extends Node2D
 ## One shared grid drives placement and enemy routes.
 const CELL := 16
-const WIDTH := 28
+const WIDTH := 16
 const HEIGHT := 16
-const CORE := Vector2i(14, 8)
+const CORE := Vector2i(8, 8)
 var buildings: Dictionary = {}
 var rocks: Dictionary = {}
 var forbidden: Dictionary = {}
@@ -23,7 +23,7 @@ var selected_radius := 0.0
 var approach_sides: PackedInt32Array = PackedInt32Array([0])
 
 func _ready() -> void:
-	position = Vector2(12, 64)
+	position = Vector2(108, 64)
 	rebuild_routes()
 
 func center(cell: Vector2i) -> Vector2:

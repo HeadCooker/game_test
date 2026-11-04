@@ -4,10 +4,10 @@
 
 [sub_resource type="Resource" id="wave_0"]
 script = ExtResource("w")
-count = 15
-spawn_interval = 1.25
+count = 19
+spawn_interval = 0.94
 preparation = 40.0
-health_multiplier = 0.90
+health_multiplier = 1.0
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -15,14 +15,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 52
+clear_reward = 39
 
 [sub_resource type="Resource" id="wave_1"]
 script = ExtResource("w")
-count = 18
-spawn_interval = 1.18
+count = 22
+spawn_interval = 0.89
 preparation = 40.0
-health_multiplier = 0.98
+health_multiplier = 1.0
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -30,14 +30,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 59
+clear_reward = 44
 
 [sub_resource type="Resource" id="wave_2"]
 script = ExtResource("w")
-count = 21
-spawn_interval = 1.11
+count = 26
+spawn_interval = 0.83
 preparation = 40.0
-health_multiplier = 1.06
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0
 burrow_ratio = 0
@@ -45,14 +45,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 66
+clear_reward = 50
 
 [sub_resource type="Resource" id="wave_3"]
 script = ExtResource("w")
-count = 24
-spawn_interval = 1.04
+count = 30
+spawn_interval = 0.78
 preparation = 40.0
-health_multiplier = 1.14
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -60,14 +60,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 73
+clear_reward = 55
 
 [sub_resource type="Resource" id="wave_4"]
 script = ExtResource("w")
-count = 27
-spawn_interval = 0.97
+count = 34
+spawn_interval = 0.73
 preparation = 40.0
-health_multiplier = 1.22
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -75,14 +75,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 80
+clear_reward = 60
 
 [sub_resource type="Resource" id="wave_5"]
 script = ExtResource("w")
-count = 30
-spawn_interval = 0.90
+count = 38
+spawn_interval = 0.68
 preparation = 40.0
-health_multiplier = 1.30
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -90,14 +90,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 87
+clear_reward = 65
 
 [sub_resource type="Resource" id="wave_6"]
 script = ExtResource("w")
-count = 33
-spawn_interval = 0.83
+count = 41
+spawn_interval = 0.62
 preparation = 40.0
-health_multiplier = 1.38
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -105,14 +105,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 94
+clear_reward = 70
 
 [sub_resource type="Resource" id="wave_7"]
 script = ExtResource("w")
-count = 36
-spawn_interval = 0.76
+count = 45
+spawn_interval = 0.57
 preparation = 40.0
-health_multiplier = 1.46
+health_multiplier = 1.0
 fast_ratio = 0.18
 armored_ratio = 0.12
 burrow_ratio = 0.1
@@ -120,16 +120,16 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 1, 2, 3)
 boss = false
-clear_reward = 101
+clear_reward = 76
 
 [resource]
 script = ExtResource("1")
 id = "3"
 title = "深层回声"
-briefing = "轮机长：推进器需要的矿物就在我们脚下。可钻机的回声像是某种回答。\n目标：守住八波，并由采矿机累计开采160合金（不扣除）。可选：结束时保有两台采矿机。\n第4波起地下突袭，观察裂隙预警，核心附近也需要火力。"
+briefing = "轮机长：推进器需要的矿物就在我们脚下。可钻机的回声像是某种回答。\n目标：守住五波，并由采矿机累计开采160合金（不扣除）。可选：结束时保有两台采矿机。\n第3波起地下突袭，观察裂隙预警，核心附近也需要火力。"
 log_main = "《采矿回声》\n指挥官：虫群总是在钻头接触深层矿脉后改变方向。它们并非没有目的地冲过来。"
 log_optional = "《双重回声》\n舰载人工智能：两台钻机收到完全相同的脉冲。整片矿床像是同一个生物的器官。"
-waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_1"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_4"), SubResource("wave_5"), SubResource("wave_6"), SubResource("wave_7")])
+waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_2"), SubResource("wave_4"), SubResource("wave_5"), SubResource("wave_7")])
 rocks = PackedVector2Array(7, 3, 7, 4, 7, 5, 7, 10, 7, 11, 7, 12, 20, 3, 20, 4, 20, 5, 20, 10, 20, 11, 20, 12)
 forbidden = PackedVector2Array(2, 8, 3, 8, 4, 8, 5, 8)
 marker = Vector2i(-1, -1)

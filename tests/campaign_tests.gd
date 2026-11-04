@@ -22,6 +22,7 @@ func create_game():
 
 func run() -> void:
 	store = root.get_node("Campaign")
+	store.shared.music = false
 	store.slot = 3
 	store.profile = store.fresh()
 	store.pending = {}
@@ -32,17 +33,17 @@ func run() -> void:
 	check(not store.start_expedition([0], "", false), "Expedition locked before mission three")
 	check(store.begin_mission(1, [0], ""), "Initial mission starts")
 	var game = create_game()
-	check(game.managed and game.waves.size() == 6, "Campaign replaces legacy ten-wave mission")
-	check(not game.place_building(Vector2i(6, 2), 0), "Rock prevents building")
-	check(not game.board.distance.has(Vector2i(6, 2)), "Rock excluded from flow field")
+	check(game.managed and game.waves.size() == 4, "Campaign replaces legacy ten-wave mission")
+	check(not game.place_building(Vector2i(3, 2), 0), "Rock prevents building")
+	check(not game.board.distance.has(Vector2i(3, 2)), "Rock excluded from flow field")
 	check(not game.place_building(Vector2i(13, 7), 1), "Unavailable loadout cannot be built")
 	check(game.place_building(Vector2i(13, 7), 0), "Carried gun is available")
 	game.alloy = 400
 	game.board.selected = Vector2i(13, 7)
 	game.upgrade_selected()
 	game.selected_tower().hp -= 17
-	game.place_building(Vector2i(12, 9), 4)
-	game.board.buildings[Vector2i(12, 9)].mining_timer = 2.75
+	game.place_building(Vector2i(10, 9), 4)
+	game.board.buildings[Vector2i(10, 9)].mining_timer = 2.75
 	game.timer = 21.5
 	game.take_core_damage(27, "工虫")
 	var money: int = game.alloy
@@ -63,7 +64,7 @@ func run() -> void:
 	check(game.alloy == money and game.core_hp == 573, "Resume restores money and core")
 	var tower: DefenseTower = game.board.buildings[Vector2i(13, 7)]
 	check(tower.level == 2 and tower.hp == tower.max_health() - 17, "Upgrade and damage restored")
-	check(game.board.buildings[Vector2i(12, 9)].mining_timer == 2.75, "Partial mining restored")
+	check(game.board.buildings[Vector2i(10, 9)].mining_timer == 2.75, "Partial mining restored")
 	check(str(game.rng.state) == state, "RNG state survives JSON serialization without precision loss")
 	game.start_wave()
 	game._process(0.1)
@@ -83,6 +84,7 @@ func run() -> void:
 		game.alloy = 100000
 		for y in range(2, 14, 2):
 			for x in range(3, 26, 3):
+				if Vector2i(x, y) == game.board.marker: continue
 				var kind: int = loadout[(x + y) % loadout.size()]
 				if game.place_building(Vector2i(x, y), kind):
 					game.board.selected = Vector2i(x, y)
@@ -90,12 +92,14 @@ func run() -> void:
 					game.upgrade_selected()
 		for y in range(6, 11):
 			for x in range(11, 18):
+				if Vector2i(x, y) == game.board.marker: continue
 				if game.station_count() < 3: game.place_building(Vector2i(x, y), 4)
-		if game.board.inside(game.mission.marker): game.place_building(game.mission.marker, loadout[0])
+		if game.board.inside(game.board.marker): game.place_building(game.board.marker, loadout[0])
 		var ticks := 0
 		while game.phase < game.Phase.VICTORY and ticks < 15000:
 			if game.phase == game.Phase.PREPARE: game.start_wave()
 			game._process(0.15)
+			for miner in game.board.buildings.values(): game.collect_miner(miner)
 			ticks += 1
 		check(game.phase == game.Phase.VICTORY, "Mission %d actual combat reaches its completion" % index)
 		check(store.profile.records.has(str(index)), "Mission %d persists its record" % index)
@@ -175,7 +179,7 @@ func run() -> void:
 	check(store.profile.expedition.offers == JSON.parse_string(JSON.stringify(original_offers)), "Reload preserves exact event and route offers")
 	check(store.launch_expedition(), "First expedition stage starts")
 	game = create_game()
-	check(game.request.mode == "expedition" and game.waves.size() == 8, "Expedition uses independent short wave set")
+	check(game.request.mode == "expedition" and game.waves.size() == 5, "Expedition uses independent short wave set")
 	game.finish(true)
 	game.queue_free()
 	await process_frame

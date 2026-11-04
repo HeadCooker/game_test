@@ -8,7 +8,7 @@ extends Resource
 @export var armor: float = 0.0
 @export var size: float = 4.0
 @export var tint: Color = Color("d39a6d")
-@export_enum("normal", "burrow", "spitter", "shield", "boss") var ability: String = "normal"
+@export_enum("normal", "burrow", "spitter", "shield", "boss", "split") var ability: String = "normal"
 @export var shield: float = 0.0
 @export var attack_range: float = 17.0
 @export var attack_interval: float = 1.0

@@ -7,6 +7,6 @@ ability = "burrow"
 health = 65.0
 speed = 17.0
 damage = 9.0
-reward = 4
+reward = 3
 size = 4.0
 tint = Color(0.72, 0.47, 0.86, 1)

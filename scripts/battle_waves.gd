@@ -3,8 +3,7 @@ extends RefCounted
 
 static func tick(game: Node, delta: float) -> void:
 	if game.phase == game.Phase.PREPARE:
-		game.timer -= delta
-		if game.timer <= 0: game.start_wave()
+		pass # Player starts each wave; no preparation countdown.
 	elif game.evacuation:
 		game.timer -= delta
 		if game.timer <= 0: game.finish(true)

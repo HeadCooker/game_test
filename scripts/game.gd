@@ -6,7 +6,11 @@ enum Phase { PREPARE, ATTACK, VICTORY, DEFEAT }
 const TOWER_SCENE = preload("res://scenes/tower.tscn")
 const ENEMY_SCENE = preload("res://scenes/enemy.tscn")
 const BUILDINGS = [preload("res://data/gun.tres"), preload("res://data/cannon.tres"), preload("res://data/slow.tres"), preload("res://data/wall.tres"), preload("res://data/miner.tres"), preload("res://data/tesla.tres"), preload("res://data/sniper.tres")]
-const BUGS = [preload("res://data/bug.tres"), preload("res://data/runner.tres"), preload("res://data/armored.tres"), preload("res://data/boss.tres"), preload("res://data/burrow.tres"), preload("res://data/spitter.tres"), preload("res://data/shield.tres")]
+const BUGS = [preload("res://data/bug.tres"), preload("res://data/runner.tres"), preload("res://data/armored.tres"), preload("res://data/boss.tres"), preload("res://data/burrow.tres"), preload("res://data/spitter.tres"), preload("res://data/shield.tres"), preload("res://data/splitter.tres")]
+var mines: Array = []
+var strike_cooldown := 0.0
+var action_mode := ""
+var action_button: Button
 var managed := false
 var request: Dictionary = {}
 var mission: MissionData
@@ -94,7 +98,7 @@ func _ready() -> void:
 	economy_changed.connect(refresh_ui)
 	status_changed.connect(refresh_ui)
 	refresh_ui()
-	show_overlay("异星撤离", "采矿前哨已被虫群发现。守住核心，等待撤离。\n\n① 左侧网格自由建塔，四周红色区域禁止建造。\n② 采矿只在进攻中产钱，准备阶段不产钱。\n③ 按空格暂停并布防，按 Enter 提前迎战。\n④ 点击建筑可升级、维修或出售。\n\n第 3 波起注意地下裂隙，第 5 波起有远程敌人。\n10 波后等待撤离；采矿机只在进攻阶段每 5 秒 +4。", "开始防守")
+	show_overlay("异星撤离", "采矿前哨已被虫群发现。守住核心，等待撤离。\n\n① 左侧网格自由建塔，四周红色区域禁止建造。\n② 采矿进攻时生产，点击采矿机收货。\n③ 按空格暂停并布防，按 Enter 开始下一波，无准备倒计时。\n④ 点击建筑可升级、维修或出售。\n\n注意地下裂隙与远程敌人；裂囊虫死亡分裂成三只幼虫。\n10 波后等待撤离；采矿机只在进攻时产矿，点击建筑领取。", "开始防守")
 
 
 	if managed:
@@ -102,7 +106,7 @@ func _ready() -> void:
 		if not Campaign.resume_snapshot.is_empty():
 			BattleSave.restore(self, Campaign.resume_snapshot)
 			Campaign.resume_snapshot = {}
-		show_overlay(mission.title if request.mode == "campaign" else "随机远征 · 第%d站" % (int(request.stage) + 1), mission.briefing if request.mode == "campaign" else expedition_brief(), "开始防守")
+		show_overlay(mission.title if request.mode == "campaign" else "随机远征 · 第%d站" % (int(request.stage) + 1), (mission.briefing if request.mode == "campaign" else expedition_brief()) + "\n\n新版操作：无准备倒计时，Enter开波。Q布雷(15)，E定点轰炸(免费/25秒冷却)。点击采矿机收货，金色圆点表示有库存，最多存40。", "开始防守")
 		save_prepare()
 		refresh_ui()
 		music = AudioStreamPlayer.new()
@@ -127,18 +131,21 @@ func configure_mission() -> void:
 	mission = GameCatalog.mission(int(request.mission))
 	waves.clear()
 	for source in mission.waves: waves.append(GameCatalog.wave_copy(source))
-	for point in mission.rocks: board.rocks[Vector2i(point)] = true
-	for point in mission.forbidden: board.forbidden[Vector2i(point)] = true
-	board.marker = mission.marker
+	for point in mission.rocks:
+		var cell := Vector2i(roundi(point.x * 15.0 / 27.0), int(point.y))
+		if cell != BattleBoard.CORE: board.rocks[cell] = true
+	for point in mission.forbidden: board.forbidden[Vector2i(roundi(point.x * 15.0 / 27.0), int(point.y))] = true
+	board.marker = Vector2i(roundi(mission.marker.x * 15.0 / 27.0), mission.marker.y) if mission.marker.x >= 0 else mission.marker
+	board.rocks.erase(board.marker)
 	board.ground_tint = mission.tint
 	battle_bonus = request.get("effects", {}).duplicate(true)
 	if request.mode == "expedition":
 		board.marker = Vector2i(-1, -1)
 		waves.clear()
-		for i in 8:
+		for i in 5:
 			var config := GameCatalog.wave_copy(load("res://data/wave_%02d.tres" % (i + 1)))
-			config.count = 17 + i * 3
-			config.health_multiplier = 0.85 + i * 0.09 + int(request.stage) * 0.16
+			config.count = 20 + i * 12
+			config.health_multiplier = 1.0 + int(request.stage) * 0.08
 			config.preparation = 30
 			config.boss = false
 			if request.modifier == "swarm": config.count = ceili(config.count * 1.2)
@@ -200,7 +207,7 @@ func optional_complete() -> bool:
 		"two_miners": return station_count() >= 2
 		"core80": return core_hp >= core_max * 0.8
 		"marker":
-			var target: DefenseTower = board.buildings.get(mission.marker)
+			var target: DefenseTower = board.buildings.get(board.marker)
 			return target != null and target.data.damage > 0
 	return false
 
@@ -284,7 +291,7 @@ func confirm_restart() -> void:
 	show_overlay("重新开始？", ("战役将按原配置重新开始。" if request.get("mode", "") == "campaign" else "将回到本波准备阶段，奖励不会重新抽取。") + "\n按 Esc 可返回游戏。" if managed else "当前这一局的进度将被清空。\n按 Esc 可返回游戏。", "确认重开")
 
 func show_help() -> void:
-	show_overlay("前哨操作手册", "1—7：选择建筑　　左键：建造 / 选中\n右键 / Esc：取消建造、关闭帮助\n空格：暂停 / 继续　　Enter：提前迎战\n\n虫群会斜走，绕路太远时会拆墙，不会穿墙角。\n采矿机在进攻中每 5 秒 +4，准备与暂停不计时。\n钻地虫有裂隙预警；电弧破盾，狙击无视盾甲。\n选中建筑后，可在右侧升级、维修或出售。", "返回防守")
+	show_overlay("前哨操作手册", "1—7：选择建筑　　左键：建造 / 选中\n右键 / Esc：取消建造、关闭帮助\n空格：暂停 / 继续　　Enter：提前迎战\n\n虫群会斜走，绕路太远时会拆墙，不会穿墙角。\n采矿机在进攻中每5秒存4，点击收货，上限40。\nQ选择地雷：15合金，接近触发；E选择轰炸：免费，冷却25秒。\n钻地虫有裂隙预警；电弧破盾，狙击无视盾甲。\n选中建筑后，可在右侧升级、维修或出售。", "返回防守")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -298,17 +305,24 @@ func _unhandled_input(event: InputEvent) -> void:
 		if overlay.visible: return
 		if event.keycode == KEY_SPACE: toggle_pause()
 		if event.keycode == KEY_ENTER: start_wave()
+		if event.keycode == KEY_Q: select_action("mine")
+		if event.keycode == KEY_E: select_action("strike")
 		if event.keycode >= KEY_1 and event.keycode <= KEY_7:
 			choose_building(event.keycode - KEY_1)
 	if event is InputEventMouseButton and event.pressed and not overlay.visible and phase < Phase.VICTORY:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
+			action_mode = ""
 			selected_type = -1
 			board.selected = Vector2i(-1, -1)
 			refresh_ui()
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			var cell := board.cell_at(board.get_local_mouse_position())
 			if not board.inside(cell): return
+			if action_mode != "":
+				use_action(cell)
+				return
 			if board.buildings.has(cell):
+				collect_miner(board.buildings[cell])
 				board.selected = cell
 				selected_type = -1
 				refresh_ui()
@@ -316,6 +330,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				place_building(cell, selected_type)
 
 func choose_building(index: int) -> void:
+	action_mode = ""
 	if not allowed_building(index): return
 	selected_type = index
 	board.selected = Vector2i(-1, -1)
@@ -336,13 +351,15 @@ func station_count() -> int:
 	return count
 
 func building_description(key: String) -> String:
-	return {"gun": "机枪：便宜、高射速，对重甲效果较弱。", "cannon": "火炮：范围爆炸，克制密集虫群。", "slow": "减速：降低移动速度，重甲和首领有抗性。", "wall": "围墙：阻挡并吸引拆墙；远程敌人可隔墙攻击。", "miner": "采矿机：进攻中每 5 秒 +4 合金；准备、暂停及撤离不计时，最多 %d 座。" % miner_limit, "tesla": "电弧：最多连锁 4 个敌人，对护盾造成双倍伤害。", "sniper": "狙击：射程远，优先精英，无视护盾和护甲。"}.get(key, "")
+	return {"gun": "机枪：便宜、高射速，对重甲效果较弱。", "cannon": "火炮：范围爆炸，克制密集虫群。", "slow": "减速：降低移动速度，重甲和首领有抗性。", "wall": "围墙：阻挡并吸引拆墙；远程敌人可隔墙攻击。", "miner": "采矿机：进攻中每5秒存4合金，点击收货，最多存40；准备、暂停及撤离不计时，最多 %d 座。" % miner_limit, "tesla": "电弧：最多连锁 4 个敌人，对护盾造成双倍伤害。", "sniper": "狙击：射程远，优先精英，无视护盾和护甲。"}.get(key, "")
 
 func place_building(cell: Vector2i, index: int) -> bool:
 	if phase >= Phase.VICTORY or index < 0 or index >= BUILDINGS.size(): return false
 	var data: BuildingData = BUILDINGS[index]
 	if not allowed_building(index): return false
 	if not board.can_build(cell) or alloy < data.cost: return false
+	for mine in mines:
+		if int(mine.x) == cell.x and int(mine.y) == cell.y: return false
 	if data.key == "miner" and station_count() >= miner_limit: return false
 	for enemy in enemies:
 		if enemy_blocks_cell(enemy, cell): return false
@@ -424,6 +441,8 @@ func _process(delta: float) -> void:
 	if toast_time > 0:
 		toast_time = maxf(0, toast_time - delta)
 		if toast_time == 0 and achievement_toast != null: achievement_toast.text = ""
+	strike_cooldown = maxf(0, strike_cooldown - delta)
+	tick_mines()
 	elapsed += delta
 	sound_cooldown -= delta
 	update_mining(delta)
@@ -438,7 +457,7 @@ func _process(delta: float) -> void:
 	for i in range(effects.size() - 1, -1, -1):
 		effects[i].life -= delta
 		if effects[i].life <= 0: effects.remove_at(i)
-	board.position = Vector2(12, 64)
+	board.position = Vector2(108, 64)
 	if shake_enabled and effects.any(func(effect: Dictionary): return effect.kind == "blast" and effect.life > 0.15):
 		board.position += Vector2(rng.randf_range(-1, 1), rng.randf_range(-1, 1))
 	ui_timer += delta
@@ -490,9 +509,9 @@ func burrow_cell() -> Vector2i:
 
 func spawn_enemy(config: WaveData, forced_kind: int = -1) -> AlienBug:
 	var side: int = config.sides[rng.randi_range(0, config.sides.size() - 1)]
-	var cell := Vector2i(rng.randi_range(1, 26), 0)
-	if side == 1: cell = Vector2i(27, rng.randi_range(1, 14))
-	if side == 2: cell = Vector2i(rng.randi_range(1, 26), 15)
+	var cell := Vector2i(rng.randi_range(1, BattleBoard.WIDTH - 2), 0)
+	if side == 1: cell = Vector2i(BattleBoard.WIDTH - 1, rng.randi_range(1, BattleBoard.HEIGHT - 2))
+	if side == 2: cell = Vector2i(rng.randi_range(1, BattleBoard.WIDTH - 2), BattleBoard.HEIGHT - 1)
 	if side == 3: cell = Vector2i(0, rng.randi_range(1, 14))
 	var roll := rng.randf()
 	var kind := 0
@@ -504,6 +523,7 @@ func spawn_enemy(config: WaveData, forced_kind: int = -1) -> AlienBug:
 		if roll < accumulated:
 			kind = kinds[i]
 			break
+	if wave >= 2 and spawned % (4 if wave == 3 else 9) == 1: kind = 7
 	if config.boss and spawned == config.count - 1: kind = 3
 	if forced_kind >= 0: kind = forced_kind
 	if kind == 4:
@@ -561,7 +581,7 @@ func finish(won: bool) -> void:
 	phase = Phase.VICTORY if won else Phase.DEFEAT
 	if not managed: best = maxi(best, cleared)
 	save_settings()
-	board.position = Vector2(12, 64)
+	board.position = Vector2(108, 64)
 	var summary := "存活 %02d:%02d   /   击杀 %d   /   通过 %d / 10 波\n最高纪录：%d 波\n\n%s" % [int(elapsed) / 60, int(elapsed) % 60, kills, cleared, best, "撤离成功！前哨的研究资料已安全带回。" if won else "核心已失守。注意地下突袭和远程虫，试试搭配电弧与轨道狙击塔。"]
 	show_overlay("撤离成功" if won else "信号中断", summary, "再来一局")
 	if managed:
@@ -597,7 +617,7 @@ func ending_text() -> String:
 
 func refresh_ui() -> void:
 	if hud == null: return
-	var status := "准备 %d 秒" % ceili(timer)
+	var status := "布防就绪 · 手动开波"
 	if phase == Phase.ATTACK: status = "撤离 %d 秒" % ceili(timer) if evacuation else "来袭 %d / %d" % [spawned, waves[wave - 1].count]
 	if paused: status = "已暂停 · 可建造"
 	hud.text = "合金 %d   核心 %d/%d   波次 %d/%d   %s" % [alloy, ceili(core_hp), int(core_max), wave, waves.size(), status]
@@ -606,8 +626,8 @@ func refresh_ui() -> void:
 		build_buttons[i].modulate = Color("6ef2cc") if selected_type == i else Color.WHITE
 	if managed and mission_hud != null:
 		var objective := "开采 %d/%d" % [mined_total, mission.mining_required] if mission.mining_required > 0 and request.mode == "campaign" else "可选目标 " + ("已满足" if optional_complete() else "未满足")
-		if int(request.mission) == 2 and request.mode == "campaign": objective += " · 接驳 %d/3批" % (int(cleared >= 2) + int(cleared >= 5) + int(cleared >= 8))
-		if int(request.mission) == 5 and request.mode == "campaign": objective += " · 解码 %d/3" % (int(cleared >= 3) + int(cleared >= 6) + int(cleared >= 9))
+		if int(request.mission) == 2 and request.mode == "campaign": objective += " · 接驳 %d/3批" % (int(cleared >= 2) + int(cleared >= 3) + int(cleared >= waves.size()))
+		if int(request.mission) == 5 and request.mode == "campaign": objective += " · 解码 %d/3" % (int(cleared >= 2) + int(cleared >= 4) + int(cleared >= waves.size()))
 		mission_hud.text = mission.title + " · " + objective if request.mode == "campaign" else "远征 %d/3 · 未带回 %d 徽记" % [int(request.stage) + 1, Campaign.profile.expedition.get("stash", 0)]
 	var tower := selected_tower()
 	sell_button.disabled = tower == null
@@ -615,6 +635,7 @@ func refresh_ui() -> void:
 		var cost := tower.upgrade_cost()
 		var repair := ceili((tower.max_health() - tower.hp) / tower.max_health() * tower.data.cost * 0.5)
 		details.text = "%s Lv.%d  HP %d/%d\n升级 %d · 维修 %d" % [tower.data.title, tower.level, ceili(tower.hp), int(tower.max_health()), cost, repair]
+		if tower.data.key == "miner": details.text = "采矿机：待收 %d/40\n点击建筑收取 · 进攻时产矿" % tower.stored_alloy
 		upgrade_button.disabled = tower.level >= 3 or tower.data.damage <= 0 or alloy < cost
 		repair_button.disabled = repair <= 0 or alloy < repair
 		var refund := floori(tower.invested * 0.65 * tower.hp / tower.max_health())
@@ -622,7 +643,7 @@ func refresh_ui() -> void:
 	else:
 		upgrade_button.disabled = true
 		repair_button.disabled = true
-		details.text = "采矿只在进攻阶段产钱\n每台5秒 +%d · 最多%d台" % [mining_yield, miner_limit]
+		details.text = "采矿点击收货，满40停产\n每台5秒存%d · 最多%d台" % [mining_yield, miner_limit]
 		sell_button.text = "出售"
 	pause_button.text = "继续" if paused else "暂停"
 	next_button.disabled = phase != Phase.PREPARE or paused
@@ -636,10 +657,15 @@ func refresh_ui() -> void:
 	if intel.spitter_ratio > 0: threats += " / 腐蚀远程"
 	if intel.shield_ratio > 0: threats += " / 护盾"
 	if intel.boss: threats += " / 巢母"
-	hint.text = "来袭：%s · %s\n1—7 选建筑 · 空格暂停 · Enter迎战 · 右键取消" % [direction, threats]
+	if wave >= 1: threats += " / 裂囊分裂"
+	threats = ["接触", "突袭", "裂囊潮", "突破", "围攻", "决战"][mini(wave if phase == Phase.PREPARE else maxi(0, wave - 1), 5)] + " · " + threats
+	hint.text = "来袭：%s · %s\nQ布雷(15) · E轰炸(免费/冷却25秒) · 点击采矿收货" % [direction, threats]
+	if action_button != null: action_button.text = "E 轰炸 " + ("就绪" if strike_cooldown <= 0 else "%d秒" % ceili(strike_cooldown))
 
 func draw_effects() -> void:
 	if board == null: return
+	for mine in mines:
+		effect_layer.draw_circle(board.center(Vector2i(int(mine.x), int(mine.y))) + board.position, 4, Color("ffe38a"))
 	for effect in effects:
 		var offset := board.position
 		var color: Color = effect.color
@@ -665,6 +691,66 @@ func draw_effects() -> void:
 			for i in 4:
 				var direction := Vector2.from_angle(i * PI / 2 + 0.5)
 				effect_layer.draw_rect(Rect2(effect.to + offset + direction * (0.3 - effect.life) * 30, Vector2(2, 2)), color)
+
+func select_action(kind: String) -> void:
+	if phase >= Phase.VICTORY: return
+	action_mode = kind
+	selected_type = -1
+	board.selected = Vector2i(-1, -1)
+	refresh_ui()
+
+func collect_miner(tower: DefenseTower) -> void:
+	if tower.data.key != "miner" or phase >= Phase.VICTORY: return
+	alloy += tower.stored_alloy
+	mined_total += tower.stored_alloy
+	tower.stored_alloy = 0
+	tower.queue_redraw()
+	economy_changed.emit()
+
+func use_action(cell: Vector2i) -> void:
+	if not board.inside(cell) or phase >= Phase.VICTORY: return
+	if action_mode == "mine":
+		if alloy < 15 or mines.size() >= 8 or not board.can_build(cell): return
+		for mine in mines:
+			if int(mine.x) == cell.x and int(mine.y) == cell.y: return
+		alloy -= 15
+		mines.append({"x": cell.x, "y": cell.y})
+	elif action_mode == "strike":
+		if phase != Phase.ATTACK or paused or strike_cooldown > 0: return
+		strike_cooldown = 25.0
+		blast_at(board.center(cell), 42, 90)
+	action_mode = ""
+	effect_layer.queue_redraw()
+	refresh_ui()
+
+func blast_at(point: Vector2, radius: float, damage: float) -> void:
+	effects.append({"kind": "blast", "to": point, "color": Color("ffe38a"), "life": 0.26})
+	for enemy: AlienBug in enemies.duplicate():
+		if enemy.position.distance_to(point) <= radius: hit_enemy(enemy, damage)
+
+func tick_mines() -> void:
+	if phase != Phase.ATTACK: return
+	for index in range(mines.size() - 1, -1, -1):
+		var mine: Dictionary = mines[index]
+		var point := board.center(Vector2i(int(mine.x), int(mine.y)))
+		for enemy: AlienBug in enemies:
+			if enemy.hp > 0 and enemy.emerging <= 0 and enemy.position.distance_to(point) < 12:
+				mines.remove_at(index)
+				blast_at(point, 30, 70)
+				break
+
+func split_enemy(parent: AlienBug) -> void:
+	if enemies.size() >= 240: return
+	var cell := board.cell_at(parent.position)
+	for index in 3:
+		var child := spawn_enemy(waves[maxi(0, wave - 1)], 1)
+		child.position = parent.position + Vector2(index - 1, 0) * 2
+		child.destination = cell
+		child.route_from = cell
+		child.summoned = true
+		child.emerging = 0.4
+		child.hp = 20
+		child.max_hp = 20
 
 func make_audio() -> void:
 	# Original synthetic laser tick: no external sound assets.

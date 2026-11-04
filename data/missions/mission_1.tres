@@ -4,10 +4,10 @@
 
 [sub_resource type="Resource" id="wave_0"]
 script = ExtResource("w")
-count = 10
-spawn_interval = 1.25
+count = 12
+spawn_interval = 0.94
 preparation = 40.0
-health_multiplier = 0.70
+health_multiplier = 0.85
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -15,14 +15,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 2)
 boss = false
-clear_reward = 52
+clear_reward = 39
 
 [sub_resource type="Resource" id="wave_1"]
 script = ExtResource("w")
-count = 13
-spawn_interval = 1.18
+count = 16
+spawn_interval = 0.89
 preparation = 40.0
-health_multiplier = 0.77
+health_multiplier = 0.85
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -30,14 +30,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 2)
 boss = false
-clear_reward = 59
+clear_reward = 44
 
 [sub_resource type="Resource" id="wave_2"]
 script = ExtResource("w")
-count = 16
-spawn_interval = 1.11
+count = 20
+spawn_interval = 0.83
 preparation = 40.0
-health_multiplier = 0.84
+health_multiplier = 0.85
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -45,14 +45,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 2)
 boss = false
-clear_reward = 66
+clear_reward = 50
 
 [sub_resource type="Resource" id="wave_3"]
 script = ExtResource("w")
-count = 19
-spawn_interval = 1.04
+count = 24
+spawn_interval = 0.78
 preparation = 40.0
-health_multiplier = 0.91
+health_multiplier = 0.85
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -60,14 +60,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 2)
 boss = false
-clear_reward = 73
+clear_reward = 55
 
 [sub_resource type="Resource" id="wave_4"]
 script = ExtResource("w")
-count = 22
-spawn_interval = 0.97
+count = 28
+spawn_interval = 0.73
 preparation = 40.0
-health_multiplier = 0.98
+health_multiplier = 0.85
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -75,14 +75,14 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 2)
 boss = false
-clear_reward = 80
+clear_reward = 60
 
 [sub_resource type="Resource" id="wave_5"]
 script = ExtResource("w")
-count = 25
-spawn_interval = 0.90
+count = 31
+spawn_interval = 0.68
 preparation = 40.0
-health_multiplier = 1.05
+health_multiplier = 0.85
 fast_ratio = 0
 armored_ratio = 0
 burrow_ratio = 0
@@ -90,16 +90,16 @@ spitter_ratio = 0
 shield_ratio = 0
 sides = PackedInt32Array(0, 2)
 boss = false
-clear_reward = 87
+clear_reward = 65
 
 [resource]
 script = ExtResource("1")
 id = "1"
 title = "坠落信号"
-briefing = "轮机长：渡鸦号还能撑住，但我们已经失去轨道通讯。\n指挥官：派出无人机，守住这座中继核心。\n目标：守住六波。北、南入口由岩壁分隔。可选：结束时保有一台采矿机。\n操作：1—7选择已携带建筑，左键建造/选中，空格暂停，Enter迎战。"
+briefing = "轮机长：渡鸦号还能撑住，但我们已经失去轨道通讯。\n指挥官：派出无人机，守住这座中继核心。\n目标：守住四波。北、南入口由岩壁分隔。可选：结束时保有一台采矿机。\n操作：1—7选择已携带建筑，左键建造/选中，空格暂停，Enter迎战。"
 log_main = "《失事记录》\n轮机长：导航说这里没有定居点。可在我们坠落前，我听到了地面发来的引导信号。"
 log_optional = "《无人机检修》\n轮机长：这座矿机留下的材料救活了通讯板。我们终于知道该向哪里求救。"
-waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_1"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_4"), SubResource("wave_5")])
+waves = Array[ExtResource("w")]([SubResource("wave_0"), SubResource("wave_2"), SubResource("wave_3"), SubResource("wave_5")])
 rocks = PackedVector2Array(6, 2, 6, 3, 6, 4, 6, 5, 6, 6, 6, 9, 6, 10, 6, 11, 6, 12, 6, 13, 21, 2, 21, 3, 21, 4, 21, 5, 21, 6, 21, 9, 21, 10, 21, 11, 21, 12, 21, 13)
 forbidden = PackedVector2Array()
 marker = Vector2i(-1, -1)

@@ -33,3 +33,7 @@ $resumeLog = & $engine --headless --path $taskRoot --script tests/resume_build_t
 $resumeExit = $LASTEXITCODE
 $resumeLog | Write-Output
 if ($resumeExit -ne 0 -or (($resumeLog -join "`n") -match 'SCRIPT ERROR|ERROR:') -or (($resumeLog -join "`n") -notmatch 'RESUME FAILURES: 0')) { throw 'Resume building test failed' }
+
+$activeLog = & $engine --headless --path $taskRoot --script tests/active_play_tests.gd --quit-after 600 2>&1
+$activeLog | Write-Output
+if ($LASTEXITCODE -ne 0 -or (($activeLog -join "`n") -match "SCRIPT ERROR|ERROR:") -or (($activeLog -join "`n") -notmatch "ACTIVE PLAY FAILURES: 0")) { throw "Active play tests failed" }
