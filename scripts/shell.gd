@@ -5,6 +5,9 @@ var font: SystemFont
 var content: VBoxContainer
 var header: Label
 var footer: Label
+var scroll: ScrollContainer
+var hero: OutpostView
+var launch_button: Button
 var page := "bridge"
 var ui_notice := ""
 var mission_index := 1
@@ -21,10 +24,10 @@ func _ready() -> void:
 	theme_data.default_font = font
 	theme_data.default_font_size = 10
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color("152932")
-	normal.border_color = Color("36515a")
+	normal.bg_color = Color("#1b2930")
+	normal.border_color = Color("#41585c")
 	normal.set_border_width_all(1)
-	normal.set_corner_radius_all(3)
+	normal.set_corner_radius_all(2)
 	normal.content_margin_left = 9
 	normal.content_margin_right = 9
 	normal.content_margin_top = 4
@@ -39,9 +42,27 @@ func _ready() -> void:
 	disabled.bg_color = Color("101a21")
 	theme_data.set_stylebox("disabled", "Button", disabled)
 	theme = theme_data
-	header = fixed_label("", Vector2(20, 13), Vector2(600, 32), 20)
-	footer = fixed_label("", Vector2(20, 46), Vector2(600, 20), 9)
-	var scroll := ScrollContainer.new()
+	header = fixed_label("", Vector2(29, 13), Vector2(480, 32), 20)
+	footer = fixed_label("", Vector2(29, 45), Vector2(580, 20), 9)
+	hero = OutpostView.new()
+	add_child(hero)
+	hero.setup(null, Rect2(338, 76, 282, 232))
+	var plate := Panel.new()
+	plate.position = Vector2(0, 199)
+	plate.size = Vector2(282, 33)
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var plate_style := StyleBoxFlat.new()
+	plate_style.bg_color = Color("#182529")
+	plate_style.border_color = Color("#a66b46")
+	plate_style.border_width_top = 1
+	plate.add_theme_stylebox_override("panel", plate_style)
+	hero.add_child(plate)
+	var caption := Label.new()
+	caption.text = "01   坠落信号  /  迫降矿区"
+	caption.position = Vector2(12, 7)
+	caption.add_theme_font_size_override("font_size", 12)
+	plate.add_child(caption)
+	scroll = ScrollContainer.new()
 	scroll.position = Vector2(20, 76)
 	scroll.size = Vector2(600, 232)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -50,6 +71,13 @@ func _ready() -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 7)
 	scroll.add_child(content)
+	launch_button = button(self, "部署出发", request_launch)
+	launch_button.position = Vector2(20, 278)
+	launch_button.size = Vector2(304, 30)
+	var deploy_style := normal.duplicate() as StyleBoxFlat
+	deploy_style.bg_color = Color("#2b4943")
+	deploy_style.border_color = Color("#83c9c3")
+	launch_button.add_theme_stylebox_override("normal", deploy_style)
 	var nav := HBoxContainer.new()
 	nav.position = Vector2(20, 323)
 	nav.size = Vector2(600, 30)
@@ -62,7 +90,7 @@ func _ready() -> void:
 	music.stream = load("res://audio/bridge.wav")
 	music.volume_db = -14
 	add_child(music)
-	show_page("bridge")
+	show_page("bridge" if get_tree().has_meta("raven_entered") else "home")
 
 func _process(_delta: float) -> void:
 	if music != null:
@@ -70,13 +98,13 @@ func _process(_delta: float) -> void:
 		elif not Campaign.shared.get("music", true) and music.playing: music.stop()
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 640, 360), Color("080f18"))
-	for i in 48:
-		var point := Vector2(posmod(i * 137, 640), posmod(i * 83, 320))
-		draw_rect(Rect2(point, Vector2.ONE), Color("2c4d5b"))
-	draw_line(Vector2(20, 69), Vector2(620, 69), Color("385d65"))
-	draw_line(Vector2(20, 315), Vector2(620, 315), Color("385d65"))
-	draw_arc(Vector2(585, 20), 140, 0, TAU, 48, Color("122a33"), 1)
+	draw_rect(Rect2(0, 0, 640, 360), Color("#11191f"))
+	draw_rect(Rect2(0, 0, 640, 67), Color("#182329"))
+	draw_rect(Rect2(0, 319, 640, 41), Color("#151f25"))
+	draw_rect(Rect2(20, 14, 3, 33), Color("#e99c65"))
+	draw_line(Vector2(20, 67), Vector2(620, 67), Color("#4c5b57"))
+	draw_line(Vector2(20, 318), Vector2(620, 318), Color("#3e5358"))
+	draw_string(font, Vector2(520, 30), "RAVEN / OPS", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#83c9c3"))
 
 func fixed_label(text: String, point: Vector2, size_value: Vector2, font_size: int) -> Label:
 	var label := Label.new()
@@ -116,11 +144,18 @@ func button(parent: Node, title: String, action: Callable, disabled := false) ->
 
 func show_page(next: String) -> void:
 	page = next
+	if page != "home": get_tree().set_meta("raven_entered", true)
+	hero.visible = page in ["home", "bridge", "brief"]
+	scroll.size = Vector2(304 if hero.visible else 600, 193 if page == "brief" else 232)
+	launch_button.visible = page == "brief"
+	launch_button.disabled = selected.is_empty()
+	scroll.scroll_vertical = 0
 	if page != "brief": ui_notice = ""
 	for child in content.get_children(): content.remove_child(child); child.queue_free()
-	header.text = "渡鸦号 / " + {"bridge": "防务舰桥", "missions": "任务星图", "brief": "出战配置", "expedition": "随机远征", "equipment": "装备库", "archive": "通讯档案", "achievements": "成就", "shop": "外观目录", "settings": "设置", "confirm": "确认操作"}.get(page, "指挥终端")
-	footer.text = "v0.4.1 · 档案 %d · 战役 %d/6 · 已入库徽记 %d%s" % [Campaign.slot, Campaign.profile.records.size(), Campaign.profile.badges, " · ◆渡鸦" if Campaign.profile.cosmetics.get("badge", "") == "bridge_raven" else ""]
+	header.text = "渡鸦号 / " + {"home": "异星撤离", "bridge": "防务舰桥", "missions": "任务星图", "brief": "出战配置", "expedition": "随机远征", "equipment": "装备库", "archive": "通讯档案", "achievements": "成就", "shop": "外观目录", "settings": "设置", "confirm": "确认操作"}.get(page, "指挥终端")
+	footer.text = "v0.6.0 · 档案 %d · 战役 %d/6 · 已入库徽记 %d%s" % [Campaign.slot, Campaign.profile.records.size(), Campaign.profile.badges, " · ◆渡鸦" if Campaign.profile.cosmetics.get("badge", "") == "bridge_raven" else ""]
 	match page:
+		"home": home_page()
 		"bridge": bridge_page()
 		"missions": mission_page()
 		"brief": brief_page()
@@ -137,6 +172,16 @@ func show_page(next: String) -> void:
 			button(content, "返回配置", show_page.bind("brief"))
 	if not Campaign.notice.is_empty(): text(Campaign.notice)
 	if not ui_notice.is_empty(): text(ui_notice)
+
+func home_page() -> void:
+	text("地面链路 / 重建中")
+	var title := text("坠落之后", true)
+	title.add_theme_font_size_override("font_size", 24)
+	text("渡鸦号迫降在一片赭红矿区。
+恢复通讯、建立防线，带幸存者离开。")
+	button(content, "进入舰桥", show_page.bind("bridge"))
+	button(content, "继续任务", continue_game, Campaign.profile.active_request.is_empty() and Campaign.profile.expedition.is_empty())
+	button(content, "剧情战役", show_page.bind("missions"))
 
 func bridge_page() -> void:
 	text("渡鸦号 · 地面链路在线", true)
@@ -171,7 +216,11 @@ func mission_page() -> void:
 		var record: Dictionary = Campaign.profile.records.get(str(i), {})
 		var medals := 0
 		for value in record.get("medals", []): medals += int(value)
-		button(content, "%02d  %s  ·  %d波  ·  %s" % [i, data.title, data.waves.size(), "勋章%d/3" % medals if not record.is_empty() else ("未完成" if Campaign.unlocked(i) else "尚未解锁")], prepare.bind(i), not Campaign.unlocked(i))
+		var status := "勋章 %d/3" % medals if not record.is_empty() else ("待部署" if Campaign.unlocked(i) else "尚未解锁")
+		var card := button(content, "%02d   %s   /   %d 波   ·   %s" % [i, data.title, data.waves.size(), status], prepare.bind(i), not Campaign.unlocked(i))
+		card.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		card.custom_minimum_size.y = 34
+		card.tooltip_text = data.briefing
 
 func prepare(index: int) -> void:
 	mission_index = index
@@ -191,6 +240,7 @@ func brief_page() -> void:
 	text("固定携带围墙和采矿机；最多选择三种炮塔，至少一种。")
 	var options := row()
 	for id in GameCatalog.TOWER_IDS:
+		if options.get_child_count() >= 3: options = row()
 		button(options, ("✓ " if selected.has(id) else "") + GameCatalog.TOWER_NAMES[id], toggle_tower.bind(id), not GameCatalog.unlocked_towers(Campaign.profile).has(id))
 	text("核心模块（仅选一种）")
 	for key in GameCatalog.unlocked_modules(Campaign.profile): button(content, ("✓ " if selected_module == key else "") + GameCatalog.MODULES[key], module_pick.bind(key))
@@ -199,8 +249,6 @@ func brief_page() -> void:
 		var choices := row()
 		button(choices, ("✓ " if story_choice == "crew" else "") + "优先人员名单", choose_story.bind("crew"))
 		button(choices, ("✓ " if story_choice == "evidence" else "") + "优先实验证据", choose_story.bind("evidence"))
-	if expedition_hard or page == "brief":
-		button(content, "出发", request_launch, selected.is_empty())
 	text("第一关奖励：火炮；第二关：减速；第三关：电弧与侦察；第四关：狙击与工业；第五关：应急。")
 
 func toggle_tower(id: int) -> void:

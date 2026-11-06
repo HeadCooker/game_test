@@ -148,7 +148,10 @@ static func hit_enemy(game: Node, enemy: AlienBug, damage: float, mode: String =
 		var absorbed := minf(enemy.shield_hp, remaining * factor)
 		enemy.shield_hp -= absorbed
 		remaining -= absorbed / factor
-	if game.managed and mode == "energy" and shield_before > 0 and enemy.shield_hp <= 0: Campaign.award("shield")
+	if shield_before > 0 and enemy.shield_hp <= 0:
+		if game.outpost_view != null:
+			game.effects.append({"kind": "shield_break", "to": enemy.position, "color": Color("#74d9ff"), "life": 0.30})
+		if game.managed and mode == "energy": Campaign.award("shield")
 	if remaining > 0:
 		enemy.hp -= remaining if mode == "piercing" else maxf(1, remaining - enemy.data.armor)
 	if enemy.hp <= 0:

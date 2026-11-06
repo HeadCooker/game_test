@@ -37,3 +37,9 @@ if ($resumeExit -ne 0 -or (($resumeLog -join "`n") -match 'SCRIPT ERROR|ERROR:')
 $activeLog = & $engine --headless --path $taskRoot --script tests/active_play_tests.gd --quit-after 600 2>&1
 $activeLog | Write-Output
 if ($LASTEXITCODE -ne 0 -or (($activeLog -join "`n") -match "SCRIPT ERROR|ERROR:") -or (($activeLog -join "`n") -notmatch "ACTIVE PLAY FAILURES: 0")) { throw "Active play tests failed" }
+
+$env:APPDATA = Join-Path $taskRoot '.tools/outpost-test-userdata'
+$outpostLog = & $engine --headless --path $taskRoot --script tests/outpost_tests.gd --quit-after 600 2>&1
+$outpostExit = $LASTEXITCODE
+$outpostLog | Write-Output
+if ($outpostExit -ne 0 -or (($outpostLog -join "`n") -match 'SCRIPT ERROR|ERROR:') -or (($outpostLog -join "`n") -notmatch 'OUTPOST FAILURES: 0')) { throw '3D outpost tests failed' }

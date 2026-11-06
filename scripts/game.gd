@@ -55,6 +55,7 @@ var started := false
 var selected_type := 0
 var effects: Array[Dictionary] = []
 var effect_layer: Node2D
+var outpost_view: OutpostView
 var rng := RandomNumberGenerator.new()
 var font: SystemFont
 var hud: Label
@@ -91,6 +92,12 @@ func _ready() -> void:
 	effect_layer = Node2D.new()
 	add_child(effect_layer)
 	effect_layer.draw.connect(draw_effects)
+	if managed and request.mode == "campaign" and int(request.mission) == 1:
+		outpost_view = OutpostView.new()
+		add_child(outpost_view)
+		outpost_view.setup(self)
+		board.hide()
+		effect_layer.hide()
 	font = SystemFont.new()
 	font.font_names = PackedStringArray(["Microsoft YaHei", "Noto Sans CJK SC", "sans-serif"])
 	make_audio()
@@ -316,7 +323,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			board.selected = Vector2i(-1, -1)
 			refresh_ui()
 		elif event.button_index == MOUSE_BUTTON_LEFT:
-			var cell := board.cell_at(board.get_local_mouse_position())
+			var cell := pointer_cell(event.position)
 			if not board.inside(cell): return
 			if action_mode != "":
 				use_action(cell)
@@ -358,8 +365,7 @@ func place_building(cell: Vector2i, index: int) -> bool:
 	var data: BuildingData = BUILDINGS[index]
 	if not allowed_building(index): return false
 	if not board.can_build(cell) or alloy < data.cost: return false
-	for mine in mines:
-		if int(mine.x) == cell.x and int(mine.y) == cell.y: return false
+	if has_mine(cell): return false
 	if data.key == "miner" and station_count() >= miner_limit: return false
 	for enemy in enemies:
 		if enemy_blocks_cell(enemy, cell): return false
@@ -460,6 +466,7 @@ func _process(delta: float) -> void:
 	board.position = Vector2(108, 64)
 	if shake_enabled and effects.any(func(effect: Dictionary): return effect.kind == "blast" and effect.life > 0.15):
 		board.position += Vector2(rng.randf_range(-1, 1), rng.randf_range(-1, 1))
+	if outpost_view != null: outpost_view.position = OutpostView.BATTLE_RECT.position + board.position - Vector2(108, 64)
 	ui_timer += delta
 	if ui_timer >= 0.1:
 		ui_timer = 0.0
@@ -472,15 +479,21 @@ func update_mining(delta: float) -> void:
 func grant_clear_reward() -> void:
 	BattleEconomy.grant_clear_reward(self)
 
+func pointer_cell(screen_position: Vector2) -> Vector2i:
+	if outpost_view != null:
+		if action_mode.is_empty() and selected_type < 0: return outpost_view.selectable_cell_at(screen_position)
+		return outpost_view.cell_at_screen(screen_position)
+	return board.cell_at(board.to_local(screen_position))
+
 func update_preview() -> void:
 	var tower := selected_tower()
 	board.selected_radius = tower.attack_radius() if tower != null else 0.0
-	board.hover = board.cell_at(board.get_local_mouse_position())
+	board.hover = pointer_cell(get_global_mouse_position()) if not overlay.visible else Vector2i(-1, -1)
 	board.preview_color = Color.TRANSPARENT
 	board.preview_radius = 0
 	if selected_type >= 0 and not overlay.visible:
 		var data: BuildingData = BUILDINGS[selected_type]
-		var valid := board.can_build(board.hover) and alloy >= data.cost
+		var valid := board.can_build(board.hover) and alloy >= data.cost and not has_mine(board.hover)
 		for enemy in enemies:
 			if enemy_blocks_cell(enemy, board.hover): valid = false
 		if data.key == "miner" and station_count() >= miner_limit: valid = false
@@ -603,6 +616,7 @@ func finish(won: bool) -> void:
 		if request.mode == "campaign":
 			body += "勋章：完成[%s] 生命60%%[%s] 可选目标[%s]\n" % ["✓" if medals[0] else "—", "✓" if medals[1] else "—", "✓" if medals[2] else "—"]
 			body += mission.log_main if won else failure_tip
+			if won and int(request.mission) == 1: body += "\n\n指挥链路恢复。火炮可在舰桥配置，下一站：最后一班接驳。"
 			if won and int(request.mission) == 6: body = ending_text() + "\n\n" + body
 		else:
 			body += "本次未带回收益已丢失。永久成果保留。" if not won else ("远征完成，徽记已安全入库。" if Campaign.profile.expedition.is_empty() else "已抵达安全节点；可撤回或继续探索。")
@@ -659,7 +673,11 @@ func refresh_ui() -> void:
 	if intel.boss: threats += " / 巢母"
 	if wave >= 1: threats += " / 裂囊分裂"
 	threats = ["接触", "突袭", "裂囊潮", "突破", "围攻", "决战"][mini(wave if phase == Phase.PREPARE else maxi(0, wave - 1), 5)] + " · " + threats
-	hint.text = "来袭：%s · %s\nQ布雷(15) · E轰炸(免费/冷却25秒) · 点击采矿收货" % [direction, threats]
+	if outpost_view != null:
+		var mode_hint := "点击采矿机收货" if action_mode.is_empty() else "选择地雷位置 · 右键取消" if action_mode == "mine" else "选择轰炸位置 · 右键取消"
+		hint.text = "来袭 %s  /  %s\n%s" % [direction, threats.split(" · ")[0], mode_hint]
+	else:
+		hint.text = "来袭：%s · %s\nQ布雷(15) · E轰炸(免费/冷却25秒) · 点击采矿收货" % [direction, threats]
 	if action_button != null: action_button.text = "E 轰炸 " + ("就绪" if strike_cooldown <= 0 else "%d秒" % ceili(strike_cooldown))
 
 func draw_effects() -> void:
@@ -707,12 +725,18 @@ func collect_miner(tower: DefenseTower) -> void:
 	tower.queue_redraw()
 	economy_changed.emit()
 
+func has_mine(cell: Vector2i) -> bool:
+	for mine in mines:
+		if int(mine.x) == cell.x and int(mine.y) == cell.y: return true
+	return false
+
+func mine_available(cell: Vector2i) -> bool:
+	return alloy >= 15 and mines.size() < 8 and board.can_build(cell) and not has_mine(cell)
+
 func use_action(cell: Vector2i) -> void:
 	if not board.inside(cell) or phase >= Phase.VICTORY: return
 	if action_mode == "mine":
-		if alloy < 15 or mines.size() >= 8 or not board.can_build(cell): return
-		for mine in mines:
-			if int(mine.x) == cell.x and int(mine.y) == cell.y: return
+		if not mine_available(cell): return
 		alloy -= 15
 		mines.append({"x": cell.x, "y": cell.y})
 	elif action_mode == "strike":
@@ -724,7 +748,7 @@ func use_action(cell: Vector2i) -> void:
 	refresh_ui()
 
 func blast_at(point: Vector2, radius: float, damage: float) -> void:
-	effects.append({"kind": "blast", "to": point, "color": Color("ffe38a"), "life": 0.26})
+	effects.append({"kind": "blast", "to": point, "color": Color("ffe38a"), "radius": radius, "life": 0.26})
 	for enemy: AlienBug in enemies.duplicate():
 		if enemy.position.distance_to(point) <= radius: hit_enemy(enemy, damage)
 

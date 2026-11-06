@@ -1,6 +1,6 @@
 # Asset provenance
 
-All gameplay graphics are procedural rectangles, lines and particles authored in this project. No downloaded art assets are used.
+The 3D outpost, equipment, creatures, and terrain shader are original Godot geometry and materials authored in this project. The earlier battlefield art uses original procedural 2D shapes and effects. The title screen uses the same original outpost environment. No reference-game models, textures, or interface assets are distributed.
 The shooting sound is synthesized at runtime by scripts/game.gd. No third-party audio recording is used.
 Chinese text uses the operating system's installed Microsoft YaHei font through SystemFont; the font file is not redistributed.
 
